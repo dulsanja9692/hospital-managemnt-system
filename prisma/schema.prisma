@@ -1,8 +1,9 @@
 // ──────────────────────────────────────────────────────────────────────────────
 // Prisma Schema — Hospital Management System
 //
-// This is the initial schema. Add models as you build out modules.
-// Run `npx prisma migrate dev --name init` to create the first migration.
+// Models for: hospitals, branches, users, roles, permissions,
+// role-permissions, audit logs, refresh tokens, patients, appointments,
+// doctors, doctor profiles/fees/availability/exceptions, hospital charges.
 // ──────────────────────────────────────────────────────────────────────────────
 
 generator client {
@@ -14,27 +15,256 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ── Example: User model for authentication ──────────────────────────────────
-// Uncomment and customize as needed:
+// ── Enums ────────────────────────────────────────────────────────────────────
 
-// model User {
-//   id        String   @id @default(cuid())
-//   email     String   @unique
-//   password  String
-//   firstName String   @map("first_name")
-//   lastName  String   @map("last_name")
-//   role      Role     @default(STAFF)
-//   isActive  Boolean  @default(true) @map("is_active")
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @updatedAt @map("updated_at")
-//
-//   @@map("users")
-// }
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
 
-// enum Role {
-//   ADMIN
-//   DOCTOR
-//   NURSE
-//   STAFF
-//   PATIENT
-// }
+// ── Hospital & Branch ────────────────────────────────────────────────────────
+
+model Hospital {
+  hospital_id    String   @id @default(uuid()) @db.Uuid
+  name           String   @db.VarChar(255)
+  address        String?  @db.Text
+  contact_number String?  @db.VarChar(20)
+  created_at     DateTime @default(now())
+
+  branches        Branch[]
+  users           User[]
+  patients        Patient[]
+  doctors         Doctor[]
+  doctor_fees     DoctorFee[]
+  hospital_charges HospitalCharge[]
+
+  @@map("hospitals")
+}
+
+model Branch {
+  branch_id   String   @id @default(uuid()) @db.Uuid
+  hospital_id String   @db.Uuid
+  name        String   @db.VarChar(255)
+  location    String?  @db.Text
+  created_at  DateTime @default(now())
+
+  hospital Hospital @relation(fields: [hospital_id], references: [hospital_id], onDelete: Cascade)
+
+  @@map("branches")
+}
+
+// ── Roles & Permissions ──────────────────────────────────────────────────────
+
+model Role {
+  role_id Int    @id @default(autoincrement())
+  name    String @unique @db.VarChar(50)
+
+  users           User[]
+  role_permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  permission_id Int    @id @default(autoincrement())
+  name          String @unique @db.VarChar(100)
+
+  role_permissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  role_id       Int
+  permission_id Int
+
+  role       Role       @relation(fields: [role_id], references: [role_id], onDelete: Cascade)
+  permission Permission @relation(fields: [permission_id], references: [permission_id], onDelete: Cascade)
+
+  @@id([role_id, permission_id])
+  @@map("role_permissions")
+}
+
+// ── User ─────────────────────────────────────────────────────────────────────
+
+model User {
+  user_id       String     @id @default(uuid()) @db.Uuid
+  hospital_id   String     @db.Uuid
+  role_id       Int
+  name          String     @db.VarChar(255)
+  email         String     @unique @db.VarChar(255)
+  password_hash String     @db.VarChar(255)
+  status        UserStatus @default(ACTIVE)
+  created_at    DateTime   @default(now())
+
+  hospital       Hospital       @relation(fields: [hospital_id], references: [hospital_id], onDelete: Cascade)
+  role           Role           @relation(fields: [role_id], references: [role_id])
+  audit_logs     AuditLog[]
+  refresh_tokens RefreshToken[]
+
+  @@map("users")
+}
+
+// ── Audit Logs ───────────────────────────────────────────────────────────────
+
+model AuditLog {
+  audit_id  String   @id @default(uuid()) @db.Uuid
+  user_id   String   @db.Uuid
+  action    String   @db.VarChar(255)
+  entity    String   @db.VarChar(255)
+  entity_id String?  @db.VarChar(255)
+  timestamp DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}
+
+// ── Refresh Tokens ───────────────────────────────────────────────────────────
+
+model RefreshToken {
+  token_id   String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  token_hash String   @db.VarChar(255)
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// ── Patients ─────────────────────────────────────────────────────────────────
+
+model Patient {
+  patient_id  String   @id @default(uuid()) @db.Uuid
+  hospital_id String   @db.Uuid
+  name        String   @db.VarChar(255)
+  nic         String   @db.VarChar(50)
+  phone       String   @db.VarChar(20)
+  email       String?  @db.VarChar(255)
+  created_at  DateTime @default(now())
+
+  hospital     Hospital        @relation(fields: [hospital_id], references: [hospital_id], onDelete: Cascade)
+  profile      PatientProfile?
+  appointments Appointment[]
+
+  @@unique([hospital_id, nic], name: "unique_hospital_nic")
+  @@map("patients")
+}
+
+model PatientProfile {
+  patient_id        String  @id @db.Uuid
+  address           String? @db.Text
+  emergency_contact String? @db.VarChar(20)
+  gender            String? @db.VarChar(10)
+  age               Int?
+
+  patient Patient @relation(fields: [patient_id], references: [patient_id], onDelete: Cascade)
+
+  @@map("patient_profiles")
+}
+
+// ── Appointments ─────────────────────────────────────────────────────────────
+
+model Appointment {
+  appointment_id String   @id @default(uuid()) @db.Uuid
+  hospital_id    String   @db.Uuid
+  patient_id     String   @db.Uuid
+  doctor_id      String?  @db.Uuid
+  doctor_name    String?  @db.VarChar(255)
+  reason         String?  @db.Text
+  status         String   @default("SCHEDULED") @db.VarChar(30)
+  scheduled_at   DateTime
+  created_at     DateTime @default(now())
+
+  patient Patient @relation(fields: [patient_id], references: [patient_id], onDelete: Cascade)
+  doctor  Doctor? @relation(fields: [doctor_id], references: [doctor_id], onDelete: SetNull)
+
+  @@map("appointments")
+}
+
+// ── Doctors ──────────────────────────────────────────────────────────────────
+
+model Doctor {
+  doctor_id      String   @id @default(uuid()) @db.Uuid
+  hospital_id    String   @db.Uuid
+  name           String   @db.VarChar(255)
+  specialization String   @db.VarChar(255)
+  status         String   @default("active") @db.VarChar(20)
+  created_at     DateTime @default(now())
+
+  hospital     Hospital           @relation(fields: [hospital_id], references: [hospital_id], onDelete: Cascade)
+  profile      DoctorProfile?
+  fees         DoctorFee[]
+  availability DoctorAvailability[]
+  exceptions   DoctorException[]
+  appointments Appointment[]
+
+  @@map("doctors")
+}
+
+model DoctorProfile {
+  doctor_id      String  @id @db.Uuid
+  contact_number String? @db.VarChar(20)
+  email          String? @db.VarChar(255)
+  qualifications String? @db.Text
+  experience     String? @db.VarChar(100)
+  bio            String? @db.Text
+
+  doctor Doctor @relation(fields: [doctor_id], references: [doctor_id], onDelete: Cascade)
+
+  @@map("doctor_profiles")
+}
+
+model DoctorFee {
+  fee_id           String   @id @default(uuid()) @db.Uuid
+  doctor_id        String   @db.Uuid
+  hospital_id      String   @db.Uuid
+  consultation_fee Decimal  @db.Decimal(10, 2)
+  effective_from   DateTime @db.Date
+  created_at       DateTime @default(now())
+
+  doctor   Doctor   @relation(fields: [doctor_id], references: [doctor_id], onDelete: Cascade)
+  hospital Hospital @relation(fields: [hospital_id], references: [hospital_id], onDelete: Cascade)
+
+  @@map("doctor_fees")
+}
+
+model HospitalCharge {
+  charge_id      String   @id @default(uuid()) @db.Uuid
+  hospital_id    String   @db.Uuid
+  charge_amount  Decimal  @db.Decimal(10, 2)
+  effective_from DateTime @db.Date
+  created_at     DateTime @default(now())
+
+  hospital Hospital @relation(fields: [hospital_id], references: [hospital_id], onDelete: Cascade)
+
+  @@map("hospital_charges")
+}
+
+model DoctorAvailability {
+  availability_id String   @id @default(uuid()) @db.Uuid
+  doctor_id       String   @db.Uuid
+  day_of_week     String   @db.VarChar(10)
+  start_time      String   @db.VarChar(5)
+  end_time        String   @db.VarChar(5)
+  created_at      DateTime @default(now())
+
+  doctor Doctor @relation(fields: [doctor_id], references: [doctor_id], onDelete: Cascade)
+
+  @@map("doctor_availability")
+}
+
+model DoctorException {
+  exception_id   String   @id @default(uuid()) @db.Uuid
+  doctor_id      String   @db.Uuid
+  exception_date DateTime @db.Date
+  reason         String?  @db.VarChar(255)
+  created_at     DateTime @default(now())
+
+  doctor Doctor @relation(fields: [doctor_id], references: [doctor_id], onDelete: Cascade)
+
+  @@map("doctor_exceptions")
+}
+

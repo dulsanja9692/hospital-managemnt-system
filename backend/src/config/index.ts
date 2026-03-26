@@ -17,8 +17,10 @@ const env = cleanEnv(process.env, {
   DATABASE_URL: str({ desc: 'PostgreSQL connection string' }),
 
   // ── Authentication ──
-  JWT_SECRET: str({ desc: 'Secret key for signing JWTs' }),
-  JWT_EXPIRES_IN: str({ default: '7d', desc: 'JWT expiration duration' }),
+  JWT_SECRET: str({ desc: 'Secret key for signing access tokens' }),
+  JWT_REFRESH_SECRET: str({ desc: 'Secret key for signing refresh tokens' }),
+  JWT_EXPIRES_IN: str({ default: '15m', desc: 'Access token expiration duration' }),
+  JWT_REFRESH_EXPIRES_IN: str({ default: '7d', desc: 'Refresh token expiration duration' }),
 
   // ── Rate Limiting ──
   RATE_LIMIT_WINDOW_MS: num({ default: 15 * 60 * 1000, desc: 'Rate limit window in ms' }),
@@ -37,7 +39,9 @@ export const config = {
   databaseUrl: env.DATABASE_URL,
   jwt: {
     secret: env.JWT_SECRET,
+    refreshSecret: env.JWT_REFRESH_SECRET,
     expiresIn: env.JWT_EXPIRES_IN,
+    refreshExpiresIn: env.JWT_REFRESH_EXPIRES_IN,
   },
   rateLimit: {
     windowMs: env.RATE_LIMIT_WINDOW_MS,

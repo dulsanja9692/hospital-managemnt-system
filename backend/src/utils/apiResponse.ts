@@ -2,7 +2,7 @@
 // API Response Helpers — enforce a consistent JSON envelope for all responses.
 //
 // Success shape: { success: true, message, data, meta? }
-// Error shape:   { success: false, message, errors? }
+// Error shape:   { success: false, message, code?, errors? }
 // ──────────────────────────────────────────────────────────────────────────────
 
 import type { Response } from 'express';
@@ -19,6 +19,7 @@ interface ErrorOptions {
   res: Response;
   statusCode?: number;
   message?: string;
+  code?: string;
   errors?: unknown[];
 }
 
@@ -31,10 +32,11 @@ export function sendSuccess<T>({ res, statusCode = 200, message = 'OK', data, me
   });
 }
 
-export function sendError({ res, statusCode = 500, message = 'Internal Server Error', errors: errs }: ErrorOptions): void {
+export function sendError({ res, statusCode = 500, message = 'Internal Server Error', code, errors: errs }: ErrorOptions): void {
   res.status(statusCode).json({
     success: false,
     message,
+    ...(code ? { code } : {}),
     ...(errs ? { errors: errs } : {}),
   });
 }

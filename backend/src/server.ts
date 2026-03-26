@@ -16,17 +16,17 @@ const startServer = async (): Promise<void> => {
     await connectDatabase();
   } catch {
     if (config.isDev) {
-      logger.warn('⚠️  Database connection failed — running without DB (dev mode)');
+      logger.warn('Database connection failed — running without DB (dev mode)');
     } else {
       process.exit(1);
     }
   }
 
   const server = app.listen(config.port, () => {
-    logger.info(`🚀 Server running on port ${config.port.toString()}`);
-    logger.info(`📋 Environment: ${config.nodeEnv}`);
-    logger.info(`🏥 Hospital Management System API ready`);
-    logger.info(`❤️  Health check: http://localhost:${config.port.toString()}/api/v1/health`);
+    logger.info(`Server running on port ${config.port.toString()}`);
+    logger.info(`Environment: ${config.nodeEnv}`);
+    logger.info(`Hospital Management System API ready`);
+    logger.info(`Health check: http://localhost:${config.port.toString()}/api/v1/health`);
   });
 
   // ── Graceful Shutdown ──────────────────────────────────────────────────────
@@ -34,18 +34,18 @@ const startServer = async (): Promise<void> => {
     logger.info(`\n${signal} received. Starting graceful shutdown...`);
 
     server.close(async () => {
-      logger.info('✅ HTTP server closed');
+      logger.info('HTTP server closed');
 
       // Disconnect database
       await disconnectDatabase();
 
-      logger.info('✅ Graceful shutdown complete');
+      logger.info('Graceful shutdown complete');
       process.exit(0);
     });
 
     // Force shutdown after 30 seconds
     setTimeout(() => {
-      logger.error('❌ Forced shutdown — could not close connections in time');
+      logger.error('Forced shutdown — could not close connections in time');
       process.exit(1);
     }, 30_000);
   };

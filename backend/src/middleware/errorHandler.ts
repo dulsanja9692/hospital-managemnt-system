@@ -20,17 +20,20 @@ export const errorHandler = (
   // Default values
   let statusCode = 500;
   let message = 'Internal Server Error';
+  let code: string | undefined;
   let errors: unknown[] | undefined;
 
   if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
+    code = err.code;
   }
 
   // Log the error
   logger.error(`${statusCode} — ${err.message}`, {
     stack: err.stack,
     statusCode,
+    code,
   });
 
   // In development, provide more detail
@@ -39,5 +42,5 @@ export const errorHandler = (
     errors = [{ message: err.message, stack: err.stack }];
   }
 
-  sendError({ res, statusCode, message, errors });
+  sendError({ res, statusCode, message, code, errors });
 };

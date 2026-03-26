@@ -1,18 +1,15 @@
 // ──────────────────────────────────────────────────────────────────────────────
 // JWT Authentication Middleware — verifies the bearer token and attaches
 // the decoded user payload to `req.user`.
-//
-// This is a skeleton; full implementation depends on your User model.
 // ──────────────────────────────────────────────────────────────────────────────
 
 import type { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { config } from '../config/index';
+import { verifyAccessToken } from '../utils/jwt.util';
 import { AppError } from '../utils/apiError';
-import type { JwtPayload } from '../types/index';
 
 /**
  * Protect routes — requires a valid JWT in the Authorization header.
+ * Attaches decoded payload (userId, email, role, hospitalId) to req.user.
  */
 export const authenticate = (req: Request, _res: Response, next: NextFunction): void => {
   // 1) Get token from header
@@ -27,8 +24,8 @@ export const authenticate = (req: Request, _res: Response, next: NextFunction): 
   }
 
   try {
-    // 2) Verify token
-    const decoded = jwt.verify(token, config.jwt.secret) as JwtPayload;
+    // 2) Verify token using jwt.util
+    const decoded = verifyAccessToken(token);
 
     // 3) Attach user info to request
     req.user = decoded;
@@ -41,7 +38,7 @@ export const authenticate = (req: Request, _res: Response, next: NextFunction): 
 
 /**
  * Role-based authorization — restricts access to specific roles.
- * Usage: router.get('/admin', authenticate, authorize('admin'), handler);
+ * Usage: router.get('/admin', authenticate, authorize('Super Admin', 'Hospital Admin'), handler);
  */
 export const authorize = (...roles: string[]) => {
   return (req: Request, _res: Response, next: NextFunction): void => {

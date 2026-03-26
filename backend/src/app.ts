@@ -25,6 +25,9 @@ import { errorHandler } from './middleware/errorHandler';
 
 // ── Route imports ──
 import healthRoutes from './modules/health/health.routes';
+import authRoutes from './modules/auth/auth.routes';
+import patientRoutes from './modules/patients/patient.routes';
+import { doctorRouter, hospitalChargeRouter } from './modules/doctors/doctor.routes';
 
 const app = express();
 
@@ -61,11 +64,12 @@ app.use(requestLogger);
 const API_PREFIX = '/api/v1';
 
 app.use(`${API_PREFIX}/health`, healthRoutes);
+app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/patients`, patientRoutes);
+app.use(`${API_PREFIX}/doctors`, doctorRouter);
+app.use(`${API_PREFIX}/hospital`, hospitalChargeRouter);
 
 // Future module routes will be added here:
-// app.use(`${API_PREFIX}/auth`, authRoutes);
-// app.use(`${API_PREFIX}/patients`, patientRoutes);
-// app.use(`${API_PREFIX}/doctors`, doctorRoutes);
 // app.use(`${API_PREFIX}/appointments`, appointmentRoutes);
 // app.use(`${API_PREFIX}/departments`, departmentRoutes);
 // app.use(`${API_PREFIX}/prescriptions`, prescriptionRoutes);
