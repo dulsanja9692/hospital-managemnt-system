@@ -1,11 +1,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, UserPlus, ChevronRight, Activity, Fingerprint, Database } from 'lucide-react';
+import { Search, UserPlus, Database, Filter } from 'lucide-react';
 
-const mockPatients = [
+// Shadcn UI Imports
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+
+// Import your new Table component
+import { PatientTable, Patient } from './components/PatientTable';
+
+const mockPatients: Patient[] = [
   { id: 'P-1001', name: 'Saman Kumara', nic: '198522334410', phone: '0712345678', status: 'Active' },
   { id: 'P-1002', name: 'Nuwanthi Silva', nic: '199512345678', phone: '0777654321', status: 'Pending' },
-  { id: 'P-1003', name: 'Arjun Perera', nic: '200188997766', phone: '0701122334', status: 'Active' },
+  { id: 'P-1003', name: 'Arjun Perera', nic: '200188997766', phone: '0701122334', status: 'Emergency' },
 ];
 
 export const PatientList = () => {
@@ -19,120 +29,76 @@ export const PatientList = () => {
   );
 
   return (
-    <div className="space-y-10 animate-soft-load text-left p-2">
-      {/* Header with Futuristic Title */}
+    <div className="space-y-8 animate-in fade-in duration-700 text-left font-sans">
+      
+      {/* 1. HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-5">
-          <div className="p-4 bg-white/3 border border-accent/30 rounded-4xl text-accent shadow-neon-purple animate-pulse-slow">
-            <Database size={28} />
+          <div className="p-4 bg-primary rounded-3xl text-white shadow-xl shadow-primary/30 relative overflow-hidden group">
+            <Database size={28} className="relative z-10" />
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
           </div>
           <div>
-            <h2 className="text-5xl font-black text-(--text-h) tracking-tighter italic uppercase">
-              Patient <span className="text-accent">DETAILS</span>
+            <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase leading-none">
+              Patient <span className="text-primary">Registry</span>
             </h2>
-            <p className="text-[10px] font-bold opacity-50 uppercase tracking-[0.3em] mt-1">
-              Neural Database • Central Records v4.0
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mt-2">
+              Central Hospital Management • Secure Records
             </p>
           </div>
         </div>
 
-        <button 
-          onClick={() => navigate('/dashboard/patients/register')}
-          className="group relative flex items-center justify-center gap-3 px-10 py-5 bg-accent text-white font-black rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-neon-purple"
+        <Button 
+          onClick={() => navigate('register')}
+          className="h-14 px-8 bg-primary text-white font-black rounded-2xl hover:scale-105 active:scale-95 shadow-xl shadow-primary/20 gap-3 transition-all"
         >
-          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-          <UserPlus size={22} className="relative" />
-          <span className="relative">ADD NEW PATIENT</span>
-        </button>
+          <UserPlus size={20} />
+          <span className="tracking-widest text-xs">REGISTER PATIENT</span>
+        </Button>
       </div>
 
-      {/* Futuristic Search Bar */}
-      <div className="flex gap-4 p-2 bg-white/2 border border-glass-border rounded-[2.5rem] backdrop-blur-xl shadow-glass-inner">
-        <div className="relative flex-1">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-accent" size={20} />
-          <input 
-            type="text" 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="SCAN BY NAME, NIC, OR SYSTEM ID..." 
-            className="w-full pl-16 pr-6 py-5 bg-transparent border-none outline-none text-accent font-bold placeholder:text-accent/30 tracking-widest text-xs"
-          />
+      {/* 2. SEARCH BAR */}
+      <Card className="p-1.5 bg-card/40 backdrop-blur-xl border-border/40 rounded-[2.5rem] shadow-2xl shadow-blue-900/5">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1 group">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-primary z-10" size={20} />
+            <Input 
+              type="text" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="SEARCH BY NAME, NIC, OR SYSTEM ID..." 
+              className="h-14 pl-16 pr-6 bg-transparent border-none focus-visible:ring-0 text-foreground font-bold placeholder:text-muted-foreground/40 tracking-wider text-[11px] uppercase"
+            />
+          </div>
+          <Separator orientation="vertical" className="h-8 opacity-20" />
+          <Button variant="ghost" size="icon" className="w-14 h-14 rounded-full text-muted-foreground hover:text-primary">
+            <Filter size={20} />
+          </Button>
         </div>
-        <button className="px-6 border-l border-glass-border text-accent/50 hover:text-accent transition-colors">
-          <Filter size={20} />
-        </button>
-      </div>
+      </Card>
 
-      {/* Holographic List Container */}
-      <div className="space-y-4">
-        {filteredPatients.map((patient) => (
-          <div 
-            key={patient.id} 
-            onClick={() => navigate(`/dashboard/patients/${patient.id}`)}
-            className="group relative cursor-pointer"
-          >
-            {/* Hover Glow Background */}
-            <div className="absolute inset-0 bg-accent blur-xl opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
-            
-            <div className="relative flex flex-col md:flex-row items-center gap-6 p-6 bg-white/3 border border-glass-border rounded-4xl hover:border-accent/40 transition-all duration-300 backdrop-blur-sm group-hover:translate-x-2">
-              
-              {/* Biometric ID Badge */}
-              <div className="flex items-center gap-4 md:w-48">
-                <div className="p-3 bg-accent/10 border border-accent/20 rounded-xl text-accent">
-                  <Fingerprint size={20} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-accent/40 uppercase tracking-tighter">System ID</span>
-                  <span className="font-mono text-xs font-bold text-accent">{patient.id}</span>
-                </div>
-              </div>
-
-              {/* Patient Core Info */}
-              <div className="flex-1 text-center md:text-left">
-                <h3 className="text-xl font-black text-(--text-h) tracking-tight group-hover:text-accent transition-colors">
-                  {patient.name}
-                </h3>
-                <div className="flex items-center justify-center md:justify-start gap-4 mt-1 opacity-50">
-                  <span className="text-[10px] font-bold tracking-widest uppercase">NIC: {patient.nic}</span>
-                  <span className="w-1 h-1 bg-white/20 rounded-full" />
-                  <span className="text-[10px] font-bold tracking-widest uppercase">MOB: {patient.phone}</span>
-                </div>
-              </div>
-
-              {/* Status Indicator */}
-              <div className="flex items-center gap-8">
-                <div className="flex flex-col items-end">
-                  <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full border ${
-                    patient.status === 'Active' 
-                      ? 'bg-green-500/10 border-green-500/20 text-green-500' 
-                      : 'bg-orange-500/10 border-orange-500/20 text-orange-500'
-                  }`}>
-                    <Activity size={12} className={patient.status === 'Active' ? 'animate-pulse' : ''} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">{patient.status}</span>
-                  </div>
-                </div>
-                
-                <div className="p-3 bg-white/5 rounded-2xl group-hover:bg-accent group-hover:text-white transition-all duration-500">
-                  <ChevronRight size={20} />
-                </div>
-              </div>
+      {/* 3. PATIENT DATA FEED (Scrollable) */}
+      <ScrollArea className="h-[calc(100vh-400px)] pr-4">
+        <div className="pb-10">
+          <PatientTable 
+            patients={filteredPatients} 
+          />
+          
+          {/* Empty State Integration */}
+          {filteredPatients.length === 0 && (
+            <div className="py-20 text-center opacity-20 flex flex-col items-center border-2 border-dashed border-border rounded-3xl">
+              <Database size={64} className="mb-4 text-muted-foreground" />
+              <p className="font-black uppercase tracking-[0.6em] text-xs">Zero Records found in Uplink</p>
             </div>
-          </div>
-        ))}
+          )}
+        </div>
+      </ScrollArea>
 
-        {filteredPatients.length === 0 && (
-          <div className="py-20 text-center opacity-20 flex flex-col items-center">
-            <Activity size={48} className="mb-4" />
-            <p className="font-black uppercase tracking-[0.5em] text-xs">Zero Matches in Registry</p>
-          </div>
-        )}
+      {/* 4. SYSTEM STATUS FOOTER */}
+      <div className="pt-8 border-t border-border/40 flex justify-between items-center opacity-30">
+        <p className="text-[9px] font-black tracking-[0.4em] uppercase">Security Level: Tier 1 Clearance</p>
+        <p className="text-[9px] font-black tracking-[0.4em] uppercase underline underline-offset-4 decoration-primary">Encryption: AES-256 Valid</p>
       </div>
-
-      {/* System Footer */}
-      <footer className="mt-12 pt-8 border-t border-white/5 flex justify-between items-center opacity-30 italic">
-        <p className="text-[9px] font-bold tracking-[0.3em]">SECURE ACCESS • {new Date().getFullYear()}</p>
-        <p className="text-[9px] font-bold tracking-[0.3em]">ENCRYPTED STREAM</p>
-      </footer>
     </div>
   );
 };

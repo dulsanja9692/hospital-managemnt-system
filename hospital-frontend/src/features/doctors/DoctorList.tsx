@@ -1,9 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, ChevronRight, UserRound, Activity } from 'lucide-react';
+import { Plus, Search, ChevronRight, UserRound, Activity, Database } from 'lucide-react';
+
+// Shadcn UI Imports
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+
+// Feature Components
 import { DoctorProfileModal } from './DoctorProfileModal';
 
-interface Doctor {
+export interface Doctor {
   id: string;
   name: string;
   dept: string;
@@ -44,105 +54,112 @@ export const DoctorList = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-full animate-soft-load text-left p-2 space-y-8">
-      {/* Header Area */}
+    <div className="flex flex-col min-h-full animate-in fade-in duration-700 text-left p-2 space-y-8 font-sans">
+      
+      {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h2 className="text-4xl font-black text-(--text-h) tracking-tighter italic uppercase">
-            Medical <span className="text-accent">Staff</span>
-          </h2>
-          <p className="text-[10px] font-bold opacity-40 uppercase tracking-[0.3em] mt-1">
-            Personnel Directory • Clinical Departments
-          </p>
+        <div className="flex items-center gap-5">
+          <div className="p-4 bg-primary rounded-3xl text-white shadow-xl shadow-primary/30 relative group overflow-hidden">
+            <Database size={28} className="relative z-10" />
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+          </div>
+          <div>
+            <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase leading-none italic">
+              Medical <span className="text-primary">Staff</span>
+            </h2>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mt-2">
+              Personnel Directory • Clinical Departments
+            </p>
+          </div>
         </div>
         
-        <button 
+        <Button 
           onClick={() => navigate('/dashboard/doctors/add')} 
-          className="group relative flex items-center gap-3 px-10 py-5 bg-accent text-white font-black rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-neon-purple"
+          className="h-14 px-10 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all gap-3"
         >
-          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-          <Plus size={22} className="relative" />
-          <span className="relative uppercase tracking-widest text-xs">Add New Doctor</span>
-        </button>
+          <Plus size={20} />
+          <span className="uppercase tracking-widest text-[10px]">Add New Doctor</span>
+        </Button>
       </div>
 
-      {/* Search Bar - Cyber Style */}
-      <div className="flex gap-4 p-2 bg-white/2 border border-glass-border rounded-[2.5rem] backdrop-blur-xl shadow-glass-inner">
-        <div className="relative flex-1">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-accent" size={20} />
-          <input 
+      {/* 2. Cyber Search Terminal */}
+      <Card className="p-1.5 bg-card/40 backdrop-blur-xl border-border/40 rounded-[2.5rem] shadow-2xl">
+        <div className="relative group">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-primary z-10" size={20} />
+          <Input 
             type="text" 
             placeholder="SEARCH BY NAME, DEPARTMENT, OR ID..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-16 pr-6 py-4 bg-transparent border-none outline-none text-accent font-bold placeholder:text-accent/20 tracking-widest text-xs"
+            className="h-14 pl-16 bg-transparent border-none focus-visible:ring-0 text-foreground font-bold placeholder:text-muted-foreground/30 tracking-widest text-[11px] uppercase"
           />
         </div>
-      </div>
+      </Card>
 
-      {/* Staff Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredDoctors.length > 0 ? (
-          filteredDoctors.map((doc) => (
-            <div 
-              key={doc.id} 
-              onClick={() => handleOpenProfile(doc)}
-              className="group relative cursor-pointer"
-            >
-              {/* Background Glow */}
-              <div className="absolute inset-0 bg-accent blur-xl opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
-              
-              <div className="relative bg-white/3 p-8 rounded-[3rem] border border-glass-border hover:border-accent/40 transition-all duration-300 backdrop-blur-sm group-hover:-translate-y-1 shadow-glass-inner">
-                <div className="flex items-start gap-5 mb-6">
-                  <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-accent border border-glass-border group-hover:bg-accent group-hover:text-white transition-all shadow-lg">
-                    <UserRound size={32} />
-                  </div>
-                  <div className="pt-1">
-                    <h3 className="font-black text-(--text-h) text-xl tracking-tight leading-tight group-hover:text-accent transition-colors">
-                      {doc.name}
-                    </h3>
-                    <p className="text-[10px] font-black text-accent uppercase tracking-[0.2em] mt-2 bg-accent/10 px-3 py-1 rounded-full w-fit">
-                      {doc.dept}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between mt-8 pt-6 border-t border-glass-border">
-                  <div className="flex items-center gap-3">
-                    <div className={`relative flex items-center justify-center w-3 h-3`}>
-                      <span className={`absolute inset-0 rounded-full animate-ping opacity-20 ${doc.status === 'On Duty' ? 'bg-green-500' : 'bg-red-500'}`} />
-                      <span className={`relative w-2 h-2 rounded-full ${doc.status === 'On Duty' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'bg-red-500/40'}`} />
+      {/* 3. Staff Cards Grid */}
+      <ScrollArea className="h-[calc(100vh-350px)] pr-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
+          {filteredDoctors.length > 0 ? (
+            filteredDoctors.map((doc) => (
+              <Card 
+                key={doc.id} 
+                onClick={() => handleOpenProfile(doc)}
+                className="group relative cursor-pointer border-border/40 bg-card/60 backdrop-blur-md rounded-[3rem] hover:border-primary/40 transition-all duration-300 hover:-translate-y-1 shadow-sm"
+              >
+                <CardContent className="p-8">
+                  <div className="flex items-start gap-5">
+                    <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center text-primary border border-primary/20 group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner">
+                      <UserRound size={32} />
                     </div>
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${doc.status === 'On Duty' ? 'text-green-500' : 'text-red-500/60'}`}>
-                      {doc.status}
-                    </span>
+                    <div className="pt-1 flex-1">
+                      <h3 className="font-black text-foreground text-xl tracking-tighter leading-tight group-hover:text-primary transition-colors uppercase">
+                        {doc.name}
+                      </h3>
+                      <Badge variant="secondary" className="mt-2 bg-primary/5 text-primary border-primary/10 font-black uppercase text-[9px] tracking-widest px-3">
+                        {doc.dept}
+                      </Badge>
+                    </div>
                   </div>
                   
-                  <div className="p-3 bg-white/5 rounded-2xl group-hover:bg-accent group-hover:text-white transition-all duration-500">
-                    <ChevronRight size={18} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full py-24 bg-white/2 rounded-[3.5rem] border border-dashed border-glass-border flex flex-col items-center justify-center text-accent/20">
-            <Activity size={64} className="mb-6 opacity-10" />
-            <p className="font-black uppercase tracking-[0.5em] text-xs">Registry Mismatch • No Records Found</p>
-          </div>
-        )}
-      </div>
+                  <Separator className="my-6 bg-border/40" />
 
-      {/* Futuristic Footer */}
-      <footer className="mt-12 pt-8 border-t border-white/5 flex justify-between items-center opacity-30 italic">
-        <p className="text-[9px] font-bold tracking-[0.3em]">MEDIFLOW ACCESS • {new Date().getFullYear()}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex items-center justify-center w-3 h-3">
+                        <span className={`absolute inset-0 rounded-full animate-ping opacity-20 ${doc.status === 'On Duty' ? 'bg-green-500' : 'bg-red-500'}`} />
+                        <span className={`relative w-2 h-2 rounded-full ${doc.status === 'On Duty' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'bg-red-500/40'}`} />
+                      </div>
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${doc.status === 'On Duty' ? 'text-green-600' : 'text-red-500/60'}`}>
+                        {doc.status}
+                      </span>
+                    </div>
+                    
+                    <div className="p-3 bg-muted/50 rounded-2xl group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-sm border border-border/40">
+                      <ChevronRight size={18} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div className="col-span-full py-24 border-2 border-dashed border-border/40 rounded-[3.5rem] flex flex-col items-center justify-center text-muted-foreground/40">
+              <Activity size={64} className="mb-6 opacity-10 animate-pulse" />
+              <p className="font-black uppercase tracking-[0.5em] text-xs">Registry Mismatch • No Records Found</p>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* 4. Footer Terminal */}
+      <footer className="pt-8 border-t border-border/40 flex justify-between items-center opacity-30 italic">
+        <p className="text-[9px] font-black tracking-[0.4em] uppercase">Mediflow Access • {new Date().getFullYear()}</p>
         <div className="flex items-center gap-6">
-          <span className="text-[9px] font-bold tracking-[0.3em]">SECURE DATA TERMINAL</span>
-          <span className="text-[9px] font-bold tracking-[0.3em]">V2.4.0</span>
+          <span className="text-[9px] font-black tracking-[0.4em] uppercase">Secure Data Terminal</span>
+          <span className="text-[9px] font-black tracking-[0.4em] uppercase underline decoration-primary">V2.4.0_STABLE</span>
         </div>
       </footer>
 
-      {/* MODAL: Conditional Rendering Logic */}
+      {/* MODAL Integration */}
       {isModalOpen && selectedDoctor && (
         <DoctorProfileModal 
           doctor={selectedDoctor} 

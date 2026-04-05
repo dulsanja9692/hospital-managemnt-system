@@ -1,8 +1,28 @@
 import { useState } from 'react';
 import { 
   Plus, Clock, Trash2, Users, ArrowRight, 
-  CalendarDays, X, CheckCircle2, Zap 
+  CalendarDays, CheckCircle2, Zap, Database 
 } from 'lucide-react';
+
+// Shadcn UI Imports
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Session {
   id: string;
@@ -26,39 +46,37 @@ export const DoctorSchedule = () => {
   };
 
   return (
-    <div className="space-y-12 animate-soft-load text-left p-2 min-h-screen">
+    <div className="space-y-12 animate-in fade-in duration-700 text-left p-2 min-h-screen font-sans">
       
-      {/* HEADER SECTION */}
+      {/* 1. HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-6">
           <div className="relative group">
-            <div className="absolute inset-0 bg-accent blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-            <div className="relative p-5 bg-white/3 border border-accent/30 rounded-4xl text-accent shadow-neon-purple">
+            <div className="absolute inset-0 bg-primary blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
+            <div className="relative p-5 bg-primary rounded-4xl text-white shadow-xl shadow-primary/30">
               <CalendarDays size={32} />
             </div>
           </div>
           <div>
-            <h2 className="text-5xl font-black text-(--text-h) tracking-tighter italic uppercase">
-              Shift <span className="text-accent">Schedule</span>
+            <h2 className="text-5xl font-black text-foreground tracking-tighter uppercase italic leading-none">
+              Shift <span className="text-primary">Schedule</span>
             </h2>
-            <p className="text-[10px] font-bold opacity-40 uppercase tracking-[0.4em] mt-1">
-              Manage clinical sessions and patient limits
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.4em] mt-3">
+              Personnel Roster • Clinical Availability
             </p>
           </div>
         </div>
         
-        <button 
+        <Button 
           onClick={() => setIsCreateModalOpen(true)}
-          className="group relative px-10 py-5 bg-accent text-white font-black rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-neon-purple"
+          className="h-16 px-10 bg-primary text-white font-black rounded-2xl hover:scale-105 active:scale-95 shadow-xl shadow-primary/20 gap-3 transition-all"
         >
-          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-          <span className="relative flex items-center gap-3 uppercase tracking-widest text-xs">
-            <Plus size={22} /> Create New Session
-          </span>
-        </button>
+          <Plus size={22} /> 
+          <span className="uppercase tracking-widest text-xs">Create New Session</span>
+        </Button>
       </div>
 
-      {/* TIMELINE VIEW */}
+      {/* 2. TIMELINE VIEW */}
       <div className="flex flex-col gap-6">
         {days.map((day) => {
           const daySessions = sessions.filter(s => s.day === day);
@@ -67,159 +85,158 @@ export const DoctorSchedule = () => {
             <div key={day} className="group flex flex-col md:flex-row items-stretch gap-4 transition-all duration-500 hover:translate-x-2">
               
               {/* Day Label Sidebar */}
-              <div className="md:w-52 bg-white/2 border border-glass-border rounded-3xl p-6 flex flex-col justify-center items-center backdrop-blur-md relative overflow-hidden group-hover:border-accent/30">
-                <div className="absolute top-0 left-0 w-1 h-full bg-accent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <h3 className="text-xs font-black uppercase tracking-[0.25em] text-accent">{day}</h3>
-                <span className="text-[10px] font-bold opacity-20 mt-2 uppercase tracking-widest">
-                  {daySessions.length} active
-                </span>
-              </div>
+              <Card className="md:w-52 bg-card/40 border-border/40 rounded-4xl p-6 flex flex-col justify-center items-center backdrop-blur-md relative overflow-hidden group-hover:border-primary/40 shadow-sm">
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                <h3 className="text-xs font-black uppercase tracking-[0.25em] text-primary">{day}</h3>
+                <Badge variant="secondary" className="mt-3 bg-primary/5 text-primary border-primary/10 font-black text-[9px] uppercase tracking-widest">
+                  {daySessions.length} SESSIONS
+                </Badge>
+              </Card>
 
               {/* Sessions Track */}
-              <div className="flex-1 bg-white/1 border border-glass-border rounded-[2.5rem] p-4 flex flex-wrap gap-4 items-center min-h-30 backdrop-blur-sm shadow-glass-inner">
+              <Card className="flex-1 bg-card/20 border-border/40 rounded-[2.5rem] p-4 flex flex-wrap gap-4 items-center min-h-30 backdrop-blur-sm shadow-inner">
                 {daySessions.map(session => (
-                  <div key={session.id} className="relative group/card animate-in zoom-in-95 duration-500">
-                    <div className="relative p-6 bg-white/4 border border-glass-border rounded-4xl flex items-center gap-8 hover:border-accent/40 transition-all shadow-xl backdrop-blur-lg">
+                  <Card key={session.id} className="relative animate-in zoom-in-95 duration-500 bg-card/60 border-border/40 rounded-4xl hover:border-primary/40 transition-all shadow-lg">
+                    <CardContent className="p-6 flex items-center gap-8">
                       <div className="flex flex-col">
-                        <div className="flex items-center gap-3 text-(--text-h) text-xl font-black tracking-tighter">
-                          <Clock size={16} className="text-accent" />
+                        <div className="flex items-center gap-3 text-foreground text-xl font-black tracking-tighter">
+                          <Clock size={16} className="text-primary" />
                           {session.startTime} <ArrowRight size={14} className="opacity-20" /> {session.endTime}
                         </div>
                         <div className="flex items-center gap-2 mt-3">
-                          <div className="px-3 py-1 bg-accent/10 rounded-full flex items-center gap-2 border border-accent/10">
-                            <Users size={12} className="text-accent" />
-                            <span className="text-[9px] font-black text-accent uppercase tracking-widest">
-                              {session.maxPatients} Patients Max
-                            </span>
-                          </div>
+                           <Badge variant="outline" className="px-3 py-1 bg-primary/5 border-primary/10 text-primary text-[9px] font-black uppercase tracking-widest gap-2">
+                             <Users size={12} />
+                             {session.maxPatients} Patients Max
+                           </Badge>
                         </div>
                       </div>
 
-                      <button 
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
                         onClick={() => removeSession(session.id)}
-                        className="p-3 bg-white/5 hover:bg-red-500/10 text-red-500/30 hover:text-red-500 rounded-xl transition-all"
+                        className="h-10 w-10 text-muted-foreground/30 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
                       >
                         <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
+                      </Button>
+                    </CardContent>
+                  </Card>
                 ))}
 
                 {daySessions.length === 0 && (
-                  <div className="ml-8 text-[10px] font-black uppercase tracking-[0.5em] opacity-10 italic">
+                  <div className="ml-8 text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/20 italic">
                     No scheduled sessions
                   </div>
                 )}
-              </div>
+              </Card>
             </div>
           );
         })}
       </div>
 
-      {/* SYSTEM FOOTER */}
-      <footer className="mt-20 pt-8 border-t border-white/5 flex justify-between items-center opacity-30 italic">
-        <p className="text-[9px] font-bold tracking-[0.3em]">SECURE ACCESS • MEDIFLOW HMS</p>
-        <p className="text-[9px] font-bold tracking-[0.3em]">VERSION 2.4.0</p>
+      {/* 3. SYSTEM FOOTER */}
+      <footer className="mt-20 pt-8 border-t border-border/40 flex justify-between items-center opacity-30 italic">
+        <p className="text-[9px] font-black tracking-[0.3em] uppercase">Secure Access • Staff ID: ITBIN-2211-0249</p>
+        <div className="flex items-center gap-2">
+           <Database size={12} className="text-primary" />
+           <p className="text-[9px] font-black tracking-[0.3em] uppercase underline decoration-primary">Live Roster Sync Valid</p>
+        </div>
       </footer>
 
-      {/* CREATE SESSION MODAL */}
-      {isCreateModalOpen && (
-        <CreateSessionModal onClose={() => setIsCreateModalOpen(false)} />
-      )}
+      {/* 4. CREATE SESSION MODAL */}
+      <CreateSessionModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+      />
     </div>
   );
 };
 
-/* --- SUB-COMPONENT: CREATE SESSION MODAL --- */
+/* --- SUB-COMPONENT: SHADCN DIALOG MODAL --- */
 
-const CreateSessionModal = ({ onClose }: { onClose: () => void }) => {
+const CreateSessionModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   return (
-    <div className="fixed inset-0 z-2000 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-in fade-in duration-500">
-      
-      {/* Background Glow Deco */}
-      <div className="absolute w-96 h-96 bg-accent/10 blur-[120px] rounded-full pointer-events-none" />
-
-      <div className="relative w-full max-w-lg bg-[#020617]/80 border border-glass-border rounded-[3rem] shadow-2xl overflow-hidden backdrop-blur-3xl animate-in zoom-in-95 duration-300">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg rounded-[3rem] p-0 overflow-hidden border-border/40 bg-card/90 backdrop-blur-3xl shadow-2xl font-sans">
         
         {/* Modal Header */}
-        <div className="p-8 border-b border-glass-border flex justify-between items-center bg-white/1">
+        <DialogHeader className="p-8 border-b border-border/40 bg-primary/2">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-accent/10 rounded-xl text-accent border border-accent/20">
+            <div className="p-3 bg-primary/10 rounded-xl text-primary border border-primary/20">
               <Zap size={20} />
             </div>
-            <div>
-              <h3 className="text-xl font-black text-(--text-h) tracking-tighter uppercase leading-none">Create Session</h3>
-              <p className="text-[9px] font-bold opacity-30 uppercase tracking-[0.3em] mt-2">Configure availability for selected personnel</p>
+            <div className="text-left">
+              <DialogTitle className="text-2xl font-black text-foreground tracking-tighter uppercase leading-none">Create Session</DialogTitle>
+              <DialogDescription className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em] mt-2">
+                Configure availability for clinical personnel
+              </DialogDescription>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl text-(--text) transition-colors">
-            <X size={20} />
-          </button>
-        </div>
+        </DialogHeader>
 
         {/* Modal Form */}
-        <div className="p-10 space-y-8">
+        <div className="p-10 space-y-8 text-left">
           
-          <div className="space-y-3 group">
-            <label className="text-[10px] font-black uppercase opacity-40 tracking-widest flex items-center gap-2 group-focus-within:text-accent transition-colors">
-              <CalendarDays size={14} /> Select Weekday
+          <div className="space-y-3">
+            <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
+              <CalendarDays size={14} className="text-primary" /> Select Weekday
             </label>
-            <select className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent transition-all font-bold text-(--text-h) appearance-none cursor-pointer">
-              <option className="bg-primary">Monday</option>
-              <option className="bg-primary">Tuesday</option>
-              <option className="bg-primary">Wednesday</option>
-              <option className="bg-primary">Thursday</option>
-              <option className="bg-primary">Friday</option>
-              <option className="bg-primary">Saturday</option>
-              <option className="bg-primary">Sunday</option>
-            </select>
+            <Select defaultValue="Monday">
+              <SelectTrigger className="h-14 rounded-2xl bg-background/50 border-border focus:ring-primary/20 font-bold">
+                <SelectValue placeholder="Select Day" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl font-bold uppercase text-xs">
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                  <SelectItem key={day} value={day}>{day}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-3 group">
-              <label className="text-[10px] font-black uppercase opacity-40 tracking-widest flex items-center gap-2 group-focus-within:text-accent transition-colors">
-                <Clock size={14} /> Start Time
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
+                <Clock size={14} className="text-primary" /> Start Time
               </label>
-              <input type="time" className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent font-bold text-(--text-h)" />
+              <Input type="time" className="h-14 rounded-2xl bg-background/50 border-border font-bold focus-visible:ring-primary/20" />
             </div>
-            <div className="space-y-3 group">
-              <label className="text-[10px] font-black uppercase opacity-40 tracking-widest flex items-center gap-2 group-focus-within:text-accent transition-colors">
-                <Clock size={14} /> End Time
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
+                <Clock size={14} className="text-primary" /> End Time
               </label>
-              <input type="time" className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent font-bold text-(--text-h)" />
+              <Input type="time" className="h-14 rounded-2xl bg-background/50 border-border font-bold focus-visible:ring-primary/20" />
             </div>
           </div>
 
-          <div className="space-y-3 group">
-            <label className="text-[10px] font-black uppercase opacity-40 tracking-widest flex items-center gap-2 group-focus-within:text-accent transition-colors">
-              <Users size={14} /> Max Patient Capacity
+          <div className="space-y-3">
+            <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
+              <Users size={14} className="text-primary" /> Max Patient Capacity
             </label>
-            <input 
+            <Input 
               type="number" 
               placeholder="e.g. 15"
-              className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent font-bold text-(--text-h) placeholder:text-white/10" 
+              className="h-14 rounded-2xl bg-background/50 border-border font-bold focus-visible:ring-primary/20 placeholder:text-muted-foreground/30" 
             />
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col gap-4 pt-4">
-            <button 
-              className="group relative w-full py-6 bg-accent text-white font-black rounded-2xl shadow-neon-purple hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 overflow-hidden"
+          <div className="flex flex-col gap-4 pt-4 pb-2">
+            <Button 
+              className="h-16 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all gap-3 uppercase tracking-widest text-[11px]"
               onClick={onClose}
             >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-              <CheckCircle2 size={18} className="relative" /> 
-              <span className="relative uppercase tracking-[0.2em] text-[11px]">Save Session Settings</span>
-            </button>
-            <button 
+              <CheckCircle2 size={18} /> Save Session Settings
+            </Button>
+            <Button 
+              variant="ghost"
               onClick={onClose}
-              className="w-full py-6 border border-glass-border text-accent text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl hover:bg-white/5 transition-all"
+              className="h-14 font-black uppercase tracking-widest text-[10px] text-muted-foreground hover:text-red-500"
             >
               Discard Changes
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

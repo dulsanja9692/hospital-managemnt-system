@@ -1,114 +1,133 @@
-import { X, Clock, Users, Calendar, CheckCircle2, Zap } from 'lucide-react';
+import { Clock, Users, Calendar, CheckCircle2, Zap } from 'lucide-react';
 
-export const CreateSessionModal = ({ onClose }: { onClose: () => void }) => {
+// Shadcn UI Imports
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface CreateSessionModalProps {
+  isOpen: boolean; 
+  onClose: () => void;
+}
+
+export const CreateSessionModal = ({ isOpen, onClose }: CreateSessionModalProps) => {
   return (
-    <div className="fixed inset-0 z-2000 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xl animate-in fade-in duration-500">
-      
-      {/* GLOWING BACKGROUND DECORATION */}
-      <div className="absolute w-96 h-96 bg-accent/10 blur-[120px] rounded-full pointer-events-none" />
-
-      <div className="relative w-full max-w-lg bg-[#020617]/90 border border-glass-border rounded-[3rem] shadow-2xl overflow-hidden backdrop-blur-3xl animate-in zoom-in-95 duration-300">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg rounded-[3rem] p-0 overflow-hidden border-border/40 bg-card/90 backdrop-blur-3xl shadow-2xl font-sans">
         
+        {/* GLOWING BACKGROUND DECORATION */}
+        <div className="absolute w-64 h-64 bg-primary/10 blur-[100px] rounded-full -top-10 -left-10 pointer-events-none" />
+
         {/* HEADER AREA */}
-        <div className="p-8 border-b border-glass-border flex justify-between items-center bg-white/2">
+        <DialogHeader className="p-8 border-b border-border/40 bg-primary/2 relative z-10">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-accent/10 rounded-xl text-accent border border-accent/20">
+            <div className="p-3 bg-primary/10 rounded-xl text-primary border border-primary/20">
               <Zap size={20} />
             </div>
-            <div>
-              <h3 className="text-xl font-black text-(--text-h) tracking-tighter uppercase leading-none">New Session</h3>
-              <p className="text-[9px] font-bold opacity-30 uppercase tracking-[0.3em] mt-2">Configure daily clinical availability</p>
+            <div className="text-left">
+              <DialogTitle className="text-xl font-black text-foreground tracking-tighter uppercase leading-none">New Session</DialogTitle>
+              <DialogDescription className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em] mt-2">
+                Configure daily clinical availability
+              </DialogDescription>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl text-(--text) transition-colors">
-            <X size={20} />
-          </button>
-        </div>
+        </DialogHeader>
 
         {/* FORM BODY */}
-        <div className="p-10 space-y-8">
+        <div className="p-10 space-y-8 relative z-10 text-left">
           
-          {/* DAY SELECTION */}
-          <div className="space-y-3 group">
-            <label className="text-[10px] font-black uppercase opacity-40 tracking-widest flex items-center gap-2 group-focus-within:text-accent transition-colors">
-              <Calendar size={14} /> Select Weekday
-            </label>
-            <div className="relative">
-              <select className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent transition-all font-bold text-(--text-h) appearance-none cursor-pointer">
-                {/* FIX: Solid background on options prevents the OS "White Background" bug */}
-                <option className="bg-[#0f172a] text-white">Monday</option>
-                <option className="bg-[#0f172a] text-white">Tuesday</option>
-                <option className="bg-[#0f172a] text-white">Wednesday</option>
-                <option className="bg-[#0f172a] text-white">Thursday</option>
-                <option className="bg-[#0f172a] text-white">Friday</option>
-                <option className="bg-[#0f172a] text-white">Saturday</option>
-                <option className="bg-[#0f172a] text-white">Sunday</option>
-              </select>
-              
-              {/* CUSTOM ARROW: Replaces the one hidden by appearance-none */}
-              <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-20 group-focus-within:opacity-100 group-focus-within:text-accent transition-all">
-                <div className="w-2 h-2 border-r-2 border-b-2 border-current rotate-45" />
-              </div>
-            </div>
+          {/* DAY SELECTION - FIX: Added 'popper' positioning and high z-index */}
+          <div className="space-y-3 relative">
+            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
+              <Calendar size={14} className="text-primary" /> Select Weekday
+            </Label>
+            <Select defaultValue="Monday">
+              <SelectTrigger className="h-14 rounded-2xl bg-white/5 dark:bg-slate-900/50 border-border focus:ring-primary/20 font-bold relative z-10">
+                <SelectValue placeholder="Select Day" />
+              </SelectTrigger>
+              <SelectContent 
+                position="popper" 
+                sideOffset={5}
+                className="w-(--radix-select-trigger-width) rounded-xl font-bold uppercase text-xs z-100 bg-popover border-border shadow-2xl"
+              >
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                  <SelectItem key={day} value={day} className="cursor-pointer">
+                    {day}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* TIME RANGE */}
           <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-3 group">
-              <label className="text-[10px] font-black uppercase opacity-40 tracking-widest flex items-center gap-2 group-focus-within:text-accent transition-colors">
-                <Clock size={14} /> Start Time
-              </label>
-              <input 
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
+                <Clock size={14} className="text-primary" /> Start Time
+              </Label>
+              <Input 
                 type="time" 
-                className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent font-bold text-(--text-h) scheme-dark" 
+                className="h-14 rounded-2xl bg-white/5 dark:bg-slate-900/50 border-border font-bold focus-visible:ring-primary/20 scheme-dark" 
               />
             </div>
-            <div className="space-y-3 group">
-              <label className="text-[10px] font-black uppercase opacity-40 tracking-widest flex items-center gap-2 group-focus-within:text-accent transition-colors">
-                <Clock size={14} /> End Time
-              </label>
-              <input 
+            <div className="space-y-3">
+              <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
+                <Clock size={14} className="text-primary" /> End Time
+              </Label>
+              <Input 
                 type="time" 
-                className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent font-bold text-(--text-h) scheme-dark" 
+                className="h-14 rounded-2xl bg-white/5 dark:bg-slate-900/50 border-border font-bold focus-visible:ring-primary/20 scheme-dark" 
               />
             </div>
           </div>
 
           {/* PATIENT LIMIT */}
-          <div className="space-y-3 group">
-            <label className="text-[10px] font-black uppercase opacity-40 tracking-widest flex items-center gap-2 group-focus-within:text-accent transition-colors">
-              <Users size={14} /> Max Patients
-            </label>
-            <input 
+          <div className="space-y-3">
+            <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
+              <Users size={14} className="text-primary" /> Max Patients
+            </Label>
+            <Input 
               type="number" 
               placeholder="e.g. 15"
-              className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent font-bold text-(--text-h) placeholder:text-white/10" 
+              className="h-14 rounded-2xl bg-white/5 dark:bg-slate-900/50 border-border font-bold placeholder:text-muted-foreground/30 focus-visible:ring-primary/20" 
             />
           </div>
 
           {/* ACTION BUTTONS */}
-          <div className="flex flex-col gap-4 pt-4">
-            <button 
-              className="group relative w-full py-6 bg-accent text-white font-black rounded-2xl shadow-neon-purple hover:scale-[1.02] active:scale-95 transition-all overflow-hidden"
+          <div className="flex flex-col gap-4 pt-4 pb-2">
+            <Button 
+              className="h-16 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all gap-3 uppercase tracking-widest text-[11px]"
               onClick={onClose}
             >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-              <span className="relative flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-[11px]">
-                <CheckCircle2 size={18} /> Initialize Session
-              </span>
-            </button>
-            <button 
+              <CheckCircle2 size={18} /> Save Session Settings
+            </Button>
+            <Button 
+              variant="ghost"
               onClick={onClose}
-              className="w-full py-6 border border-glass-border text-accent/60 font-black uppercase tracking-[0.3em] text-[10px] rounded-2xl hover:bg-white/5 transition-all"
+              className="h-14 font-black uppercase tracking-widest text-[10px] text-muted-foreground hover:text-red-500"
             >
               Discard Changes
-            </button>
+            </Button>
           </div>
         </div>
 
-        {/* FOOTER DECO */}
-        <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-accent/20 blur-3xl rounded-full pointer-events-none" />
-      </div>
-    </div>
+        {/* DECORATIVE ACCENT */}
+        <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary/10 blur-3xl rounded-full pointer-events-none" />
+      </DialogContent>
+    </Dialog>
   );
 };

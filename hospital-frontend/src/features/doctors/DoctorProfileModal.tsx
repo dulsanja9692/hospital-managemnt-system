@@ -1,6 +1,20 @@
-import { X, UserRound, Briefcase, Phone, Save, Edit2, Hash, CalendarClock, Trash2, CheckCircle2, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  X, UserRound, Briefcase, Phone, Save, Edit2, 
+  Hash, CalendarClock, Trash2, CheckCircle2, XCircle, Zap 
+} from 'lucide-react';
+
+// Shadcn UI Imports (Removed Separator to fix the error)
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 interface Doctor {
   id: string;
@@ -37,166 +51,169 @@ export const DoctorProfileModal = ({ doctor, onClose, onUpdate, onDelete }: Moda
   };
 
   return (
-    <div className="fixed inset-0 z-1000 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300 text-left">
-      <div className="bg-(--code-bg) w-full max-w-2xl max-h-[90vh] rounded-[3.5rem] border border-glass-border shadow-2xl overflow-y-auto relative my-auto animate-in zoom-in-95 duration-300 no-scrollbar">
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-2xl rounded-[3.5rem] p-0 overflow-hidden border-border/40 bg-card/90 backdrop-blur-3xl shadow-2xl font-sans">
         
-        {/* PURPLE HEADER BAR - Buttons are now inside this flex container */}
-        <div className="sticky top-0 h-32 bg-linear-to-r from-accent to-purple-900 opacity-30 w-full z-0 flex items-start justify-end p-8">
+        {/* 1. FUTURISTIC HEADER BAR */}
+        <div className="relative h-32 bg-linear-to-r from-primary to-purple-900/40 w-full flex items-start justify-end p-6">
           <div className="flex gap-3 relative z-50">
             {!isEditing && (
               <>
-                {/* Schedule Button */}
-                <button 
-                  type="button"
+                <Button 
+                  variant="secondary"
+                  size="icon"
                   onClick={() => navigate('/dashboard/doctors/schedule')} 
-                  className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white hover:bg-white/20 transition-all active:scale-90 flex items-center gap-2 group shadow-xl"
-                  title="Manage Schedule"
+                  className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 shadow-xl"
                 >
                   <CalendarClock size={20} />
-                  <span className="text-[10px] font-black uppercase tracking-widest hidden group-hover:inline-block">Schedule</span>
-                </button>
+                </Button>
 
-                {/* Edit Button */}
-                <button 
-                  type="button" 
+                <Button 
+                  variant="secondary"
+                  size="icon"
                   onClick={() => setIsEditing(true)} 
-                  className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white hover:bg-white/20 transition-all active:scale-90 shadow-xl"
-                  title="Edit Profile"
+                  className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 shadow-xl"
                 >
                   <Edit2 size={20} />
-                </button>
+                </Button>
               </>
             )}
             
-            {/* Close Button */}
-            <button 
-              type="button" 
+            <Button 
+              variant="secondary"
+              size="icon"
               onClick={onClose} 
-              className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white hover:bg-red-500/40 transition-all active:scale-90 shadow-xl"
-              title="Close"
+              className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-red-500/40 shadow-xl"
             >
               <X size={20} />
-            </button>
+            </Button>
           </div>
         </div>
 
-        {/* Content Area - Pulling identity up to overlap the header */}
-        <div className="relative p-10 pt-0 -mt-14">
+        {/* 2. PROFILE CONTENT AREA */}
+        <div className="relative p-10 pt-0 -mt-14 text-left">
           
-          {/* Profile Identity */}
+          {/* Identity Header */}
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 mb-12">
-            <div className="w-28 h-28 bg-(--bg) rounded-4xl border-4 border-(--code-bg) shadow-2xl flex items-center justify-center text-accent shrink-0 overflow-hidden relative z-10">
-               <UserRound size={48} />
+            <div className="w-28 h-28 bg-background rounded-4xl border-4 border-card shadow-2xl flex items-center justify-center text-primary shrink-0 overflow-hidden relative z-10">
+                <UserRound size={48} className={isEditing ? "animate-pulse" : ""} />
             </div>
             
             <div className="text-center sm:text-left flex-1 pb-2">
-              <button 
-                type="button"
+              <Badge 
                 onClick={toggleStatus}
-                disabled={!isEditing}
-                className={`mb-3 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 mx-auto sm:mx-0 border ${
+                variant="outline"
+                className={`mb-3 h-8 px-4 rounded-full text-[10px] font-black uppercase tracking-widest transition-all gap-2 border shadow-sm ${
                   formData.status === 'On Duty' 
-                    ? 'bg-green-500/10 text-green-500 border-green-500/20' 
+                    ? 'bg-green-500/10 text-green-600 border-green-500/20' 
                     : 'bg-red-500/10 text-red-500 border-red-500/20'
-                } ${isEditing ? 'cursor-pointer hover:brightness-125' : 'cursor-default'}`}
+                } ${isEditing ? 'cursor-pointer hover:scale-105' : 'cursor-default'}`}
               >
                 {formData.status === 'On Duty' ? <CheckCircle2 size={12}/> : <XCircle size={12}/>}
                 {formData.status}
-              </button>
+              </Badge>
 
               {isEditing ? (
-                <input 
-                  type="text" 
+                <Input 
                   value={formData.name} 
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="block text-2xl font-black text-(--text-h) bg-white/3 border border-glass-border rounded-xl px-4 py-2 outline-none focus:border-accent w-full"
+                  className="h-14 text-xl font-black bg-white/5 border-primary/20 rounded-2xl px-5 uppercase"
                 />
               ) : (
-                <h2 className="text-4xl font-black text-(--text-h) tracking-tight leading-none uppercase italic">{formData.name}</h2>
+                <DialogHeader>
+                  <DialogTitle className="text-4xl font-black text-foreground tracking-tighter uppercase italic leading-none">
+                    {formData.name}
+                  </DialogTitle>
+                </DialogHeader>
               )}
             </div>
           </div>
 
-          {/* Data Grid */}
+          {/* 3. PROFESSIONAL DATA GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-3 text-left">
-              <label className="text-[10px] font-black uppercase opacity-40 flex items-center gap-2 ml-1 tracking-widest">
-                <Hash size={14} /> License No
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 ml-1 tracking-widest">
+                <Hash size={14} className="text-primary" /> License Authority
               </label>
               {isEditing ? (
-                <input 
-                  type="text" 
+                <Input 
                   value={formData.license || ''} 
                   onChange={(e) => setFormData({...formData, license: e.target.value})}
-                  className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent font-bold"
+                  className="h-14 bg-white/5 border-border rounded-2xl font-bold"
                 />
               ) : (
-                <div className="p-5 bg-white/3 border border-glass-border rounded-2xl text-lg font-bold text-accent shadow-glass-inner">
-                  {formData.license || 'N/A'}
+                <div className="p-5 bg-primary/5 border border-primary/10 rounded-2xl text-lg font-black text-primary tracking-tight">
+                  {formData.license || 'NOT_FOUND'}
                 </div>
               )}
             </div>
 
-            <div className="space-y-3 text-left">
-              <label className="text-[10px] font-black uppercase opacity-40 flex items-center gap-2 ml-1 tracking-widest">
-                <Briefcase size={14} /> Specialty
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 ml-1 tracking-widest">
+                <Briefcase size={14} className="text-primary" /> Specialty Unit
               </label>
-              <div className="p-5 bg-white/3 border border-glass-border rounded-2xl text-lg font-black text-(--text-h) uppercase tracking-tighter opacity-70">
+              <div className="p-5 bg-muted/30 border border-border rounded-2xl text-lg font-black text-foreground/70 uppercase tracking-tighter">
                 {formData.dept}
               </div>
             </div>
 
-            <div className="space-y-3 text-left">
-              <label className="text-[10px] font-black uppercase opacity-40 flex items-center gap-2 ml-1 tracking-widest">
-                <Phone size={14} /> Contact
+            <div className="space-y-3 md:col-span-2 text-left">
+              <label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 ml-1 tracking-widest">
+                <Phone size={14} className="text-primary" /> Secure Contact
               </label>
               {isEditing ? (
-                <input 
+                <Input 
                   type="tel" 
                   value={formData.phone || ''} 
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent font-bold"
+                  className="h-14 bg-white/5 border-border rounded-2xl font-bold"
                 />
               ) : (
-                <div className="p-5 bg-white/3 border border-glass-border rounded-2xl text-lg font-bold text-(--text-h)">
-                  {formData.phone || 'N/A'}
+                <div className="p-5 bg-muted/30 border border-border rounded-2xl text-lg font-bold text-foreground">
+                  {formData.phone || 'NO_SIGNAL'}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Footer Actions for Editing */}
+          {/* 4. EDITING ACTIONS */}
           {isEditing && (
-            <div className="mt-12 pt-8 border-t border-glass-border flex flex-col sm:flex-row gap-4 animate-in slide-in-from-bottom-4">
-              <button 
-                type="button"
-                onClick={() => onDelete && onDelete(formData.id)}
-                className="px-6 py-5 border-2 border-red-500/20 text-red-500 font-black rounded-2xl hover:bg-red-500/10 transition-all flex items-center justify-center gap-3 group"
-              >
-                <Trash2 size={20} className="group-hover:animate-bounce" />
-                Remove Personnel
-              </button>
+            <div className="mt-12 pt-8 border-t border-border/40 space-y-6 animate-in slide-in-from-bottom-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => onDelete && onDelete(formData.id)}
+                  className="h-14 px-8 border-red-500/20 text-red-500 font-black rounded-2xl hover:bg-red-500/10 gap-3 group"
+                >
+                  <Trash2 size={20} className="group-hover:animate-bounce" />
+                  REMOVE PERSONNEL
+                </Button>
 
-              <div className="flex-1 flex gap-4">
-                <button 
-                  type="button" 
-                  onClick={handleSave} 
-                  className="flex-1 py-5 bg-accent text-white font-black rounded-2xl shadow-neon-purple hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs"
-                >
-                  <Save size={20} /> Update Record
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => setIsEditing(false)} 
-                  className="px-10 py-5 border border-glass-border text-(--text-h) font-black rounded-2xl hover:bg-white/5 active:scale-95 transition-all uppercase tracking-widest text-xs"
-                >
-                  Discard
-                </button>
+                <div className="flex-1 flex gap-4">
+                  <Button 
+                    onClick={handleSave} 
+                    className="flex-1 h-14 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all gap-3 uppercase tracking-widest text-[10px]"
+                  >
+                    <Save size={20} /> Update Record
+                  </Button>
+                  <Button 
+                    variant="ghost"
+                    onClick={() => setIsEditing(false)} 
+                    className="px-8 h-14 font-black rounded-2xl hover:bg-muted active:scale-95 transition-all uppercase tracking-widest text-[10px]"
+                  >
+                    Discard
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="flex justify-center items-center gap-2 opacity-20">
+                <Zap size={12} className="text-primary" />
+                <span className="text-[8px] font-bold uppercase tracking-[0.4em]">Encrypted Staff Uplink Valid</span>
               </div>
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

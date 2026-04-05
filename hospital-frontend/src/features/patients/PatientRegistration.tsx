@@ -1,151 +1,211 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShieldCheck, MapPin, Phone, Cpu, Database, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { 
+  ArrowLeft, ShieldCheck, MapPin, Phone, Zap, User, 
+  Loader2, CheckCircle2, Droplets, Scale, Ruler, Thermometer, Activity 
+} from 'lucide-react';
+
+// Shadcn UI Components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea"; // Updated
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const PatientRegistration = () => {
   const navigate = useNavigate();
+  const [status, setStatus] = useState<'idle' | 'saving' | 'success'>('idle');
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate high-tech save sequence
-    alert("Biometric Data Uplink Successful!");
-    navigate('/dashboard/patients');
+    setStatus('saving');
+    
+    // Simulate secure medical data uplink
+    setTimeout(() => {
+      setStatus('success');
+      setTimeout(() => {
+        navigate('/dashboard/patients');
+      }, 1000);
+    }, 1500);
   };
 
   return (
-    <div className="max-w-5xl mx-auto animate-soft-load p-2">
+    <div className="max-w-7xl mx-auto p-2 transition-all duration-500 pb-10 font-sans">
       
-      {/* FUTURISTIC HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+      {/* 1. FUTURISTIC HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
         <div className="flex items-center gap-6 text-left">
           <div className="relative group">
-            <div className="absolute inset-0 bg-accent blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-            <div className="relative p-5 bg-white/3 rounded-4xl border border-accent/30 shadow-neon-purple">
-              <Cpu className="text-accent animate-pulse-slow" size={32} />
+            <div className="absolute inset-0 bg-primary blur-2xl opacity-20 group-hover:opacity-40 transition-opacity" />
+            <div className="relative p-5 bg-primary rounded-4xl shadow-xl shadow-primary/30 group-hover:scale-105 transition-transform">
+              <User className="text-white" size={32} />
             </div>
           </div>
           <div>
-            <h2 className="text-5xl font-black text-(--text-h) tracking-tighter italic uppercase">
-              New <span className="text-accent">Registration</span>
+            <h2 className="text-4xl md:text-5xl font-black text-foreground tracking-tighter uppercase leading-none">
+              New <span className="text-primary">Registration</span>
             </h2>
-            <p className="text-[10px] font-bold opacity-50 uppercase tracking-[0.4em] mt-1">
-              Initializing Central Patient Registry Entry
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.4em] mt-3 text-left">
+              Initializing Secure Patient Registry Entry | Staff ID: ITBIN-2211-0249
             </p>
           </div>
         </div>
         
-        <button 
+        <Button 
+          variant="outline"
           onClick={() => navigate('/dashboard/patients')}
-          className="flex items-center gap-2 text-accent/60 font-black uppercase tracking-widest text-[10px] hover:text-accent transition-all group"
+          className="h-12 px-8 border-2 border-primary text-primary font-black uppercase tracking-widest text-[10px] hover:bg-primary hover:text-white rounded-2xl transition-all group"
         >
-          <ArrowLeft size={16} className="group-hover:-translate-x-2 transition-transform" />
-          Return to Archive
-        </button>
+          <ArrowLeft size={16} className="mr-2 group-hover:-translate-x-1 transition-transform" />
+          Return to Registry
+        </Button>
       </div>
 
-      {/* REGISTRATION FORM (GLASS CARD) */}
-      <form 
-        onSubmit={handleRegister} 
-        className="relative grid grid-cols-1 md:grid-cols-2 gap-10 bg-white/2 backdrop-blur-2xl p-12 rounded-[3.5rem] border border-glass-border shadow-glass-inner overflow-hidden"
-      >
-        {/* Subtle Scanning Line Effect */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-accent/20 to-transparent animate-scan pointer-events-none" />
-
-        {/* IDENTITY SECTION */}
-        <div className="space-y-8 flex flex-col items-start">
-          <div className="flex items-center gap-3 text-accent border-b border-accent/20 pb-3 w-full">
-            <ShieldCheck size={20} />
-            <span className="font-black text-[10px] uppercase tracking-[0.3em]">Personal Details</span>
-          </div>
+      {/* 2. REGISTRATION FORM */}
+      <form onSubmit={handleRegister} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          <div className="w-full group">
-            <label className="block text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 ml-1 group-focus-within:opacity-100 group-focus-within:text-accent transition-all">Full Name (with Initials)</label>
-            <input 
-              type="text" 
-              required 
-              className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent focus:bg-accent/5 transition-all font-bold text-(--text-h) placeholder:text-white/10" 
-              placeholder="ENTER FULL NAME" 
-            />
+          {/* SECTION A: IDENTITY MANAGEMENT */}
+          <div className="bg-card/40 backdrop-blur-3xl p-8 rounded-[2.5rem] border border-border/40 shadow-2xl space-y-6">
+            <div className="flex items-center gap-3 text-primary border-b border-primary/10 pb-4">
+              <ShieldCheck size={20} />
+              <span className="font-black text-[11px] uppercase tracking-[0.3em]">Identity Protocol</span>
+            </div>
+            
+            <div className="space-y-3 text-left">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Full Legal Name</Label>
+              <Input required placeholder="SAMAN KUMARA" className="h-14 rounded-2xl bg-white/50 dark:bg-slate-900/50 border-border/40 font-bold uppercase tracking-tight" />
+            </div>
+
+            <div className="space-y-3 text-left">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Identity Number (NIC)</Label>
+              <Input required placeholder="19XXXXXXXXXX" className="h-14 rounded-2xl bg-white/50 dark:bg-slate-900/50 border-border/40 font-mono text-xs font-bold" />
+            </div>
           </div>
 
-          <div className="w-full group">
-            <label className="block text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 ml-1 group-focus-within:opacity-100 group-focus-within:text-accent transition-all">NIC Number</label>
-            <input 
-              type="text" 
-              required 
-              className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent focus:bg-accent/5 transition-all font-bold text-(--text-h) placeholder:text-white/10" 
-              placeholder="19XXXXXXXXXX" 
-            />
+          {/* SECTION B: CLINICAL VITALS */}
+          <div className="bg-card/40 backdrop-blur-3xl p-8 rounded-[2.5rem] border border-border/40 shadow-2xl space-y-6">
+            <div className="flex items-center gap-3 text-primary border-b border-primary/10 pb-4">
+              <Activity size={20} />
+              <span className="font-black text-[11px] uppercase tracking-[0.3em]">Vitals Profile</span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 w-full">
+              <div className="space-y-3 text-left">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Blood Group</Label>
+                <Select>
+                  <SelectTrigger className="h-14 rounded-2xl font-bold bg-white/50 border-border/40">
+                    <Droplets className="mr-2 h-4 w-4 text-red-500" />
+                    <SelectValue placeholder="Group" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl font-bold">
+                    {['A+', 'B+', 'O+', 'AB+', 'A-', 'B-', 'O-', 'AB-'].map(group => (
+                      <SelectItem key={group} value={group}>{group}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3 text-left">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Weight (kg)</Label>
+                <div className="relative">
+                  <Scale className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 z-10" size={16} />
+                  <Input className="h-14 pl-11 rounded-2xl bg-white/50 border-border/40 font-bold" placeholder="72kg" />
+                </div>
+              </div>
+
+              <div className="space-y-3 text-left">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Height (cm)</Label>
+                <div className="relative">
+                  <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 text-primary z-10" size={16} />
+                  <Input className="h-14 pl-11 rounded-2xl bg-white/50 border-border/40 font-bold" placeholder="175cm" />
+                </div>
+              </div>
+
+              <div className="space-y-3 text-left">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Core Temp</Label>
+                <div className="relative">
+                  <Thermometer className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 z-10" size={16} />
+                  <Input className="h-14 pl-11 rounded-2xl bg-white/50 border-border/40 font-bold" placeholder="36.8°C" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION C: CONTACT PROTOCOL */}
+          <div className="bg-card/40 backdrop-blur-3xl p-8 rounded-[2.5rem] border border-border/40 shadow-2xl space-y-6">
+            <div className="flex items-center gap-3 text-primary border-b border-primary/10 pb-4">
+              <Phone size={20} />
+              <span className="font-black text-[11px] uppercase tracking-[0.3em]">Contact Protocol</span>
+            </div>
+            
+            <div className="space-y-3 text-left">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Mobile Interface</Label>
+              <Input required type="tel" placeholder="07XXXXXXXX" className="h-14 rounded-2xl bg-white/50 border-border/40 font-bold" />
+            </div>
+
+            <div className="space-y-3 text-left">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Emergency Relation</Label>
+              <Input required placeholder="Guardian / Relative" className="h-14 rounded-2xl bg-white/50 border-border/40 font-bold" />
+            </div>
           </div>
         </div>
 
-        {/* CONTACT SECTION */}
-        <div className="space-y-8 flex flex-col items-start">
-          <div className="flex items-center gap-3 text-accent border-b border-accent/20 pb-3 w-full">
-            <Phone size={20} />
-            <span className="font-black text-[10px] uppercase tracking-[0.3em]">Contact Details</span>
-          </div>
-
-          <div className="w-full group">
-            <label className="block text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 ml-1 group-focus-within:opacity-100 group-focus-within:text-accent transition-all">Personal Mobile Number</label>
-            <input 
-              type="tel" 
-              required 
-              className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent focus:bg-accent/5 transition-all font-bold text-(--text-h) placeholder:text-white/10" 
-              placeholder="07XXXXXXXX" 
-            />
-          </div>
-
-          <div className="w-full group">
-            <label className="block text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 ml-1 group-focus-within:opacity-100 group-focus-within:text-accent transition-all">Emergency Contact Number</label>
-            <input 
-              type="text" 
-              className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent focus:bg-accent/5 transition-all font-bold text-(--text-h) placeholder:text-white/10" 
-              placeholder="GUARDIAN" 
-            />
-          </div>
-        </div>
-
-        {/* LOCATION SECTION (FULL WIDTH) */}
-        <div className="md:col-span-2 space-y-6 flex flex-col items-start pt-8">
-          <div className="flex items-center gap-3 text-accent border-b border-accent/20 pb-3 w-full">
+        {/* FULL WIDTH: ADDRESS LOGISTICS */}
+        <div className="bg-card/40 backdrop-blur-3xl p-8 rounded-[3rem] border border-border/40 shadow-2xl space-y-6 text-left">
+          <div className="flex items-center gap-3 text-primary border-b border-primary/10 pb-4">
             <MapPin size={20} />
-            <span className="font-black text-[10px] uppercase tracking-[0.3em]">Address</span>
+            <span className="font-black text-[11px] uppercase tracking-[0.3em]">Residential Logistics</span>
           </div>
-          <div className="w-full group">
-            <label className="block text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 ml-1 group-focus-within:opacity-100 group-focus-within:text-accent transition-all">Permanent Address</label>
-            <textarea 
-              required 
+          <div className="space-y-3">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Permanent Residence Address</Label>
+            <Textarea 
               rows={3} 
-              className="w-full p-5 bg-white/3 border-b-2 border-glass-border rounded-t-2xl outline-none focus:border-accent focus:bg-accent/5 transition-all font-bold text-(--text-h) resize-none placeholder:text-white/10" 
-              placeholder="ENTER ADDRESS"
-            ></textarea>
+              className="rounded-3xl border-border/40 bg-white/50 dark:bg-slate-900/50 font-bold text-foreground focus-visible:ring-primary/20 resize-none p-5" 
+              placeholder="ENTER FULL RESIDENCE ADDRESS DATA..."
+            />
           </div>
         </div>
 
-        {/* FORM ACTIONS (ENHANCED) */}
-        <div className="md:col-span-2 flex flex-col sm:flex-row gap-6 pt-10 mt-6 border-t border-glass-border">
-          <button 
+        {/* FINAL ACTIONS */}
+        <div className="flex flex-col sm:flex-row gap-6 pt-4 pb-12">
+          <Button 
             type="submit" 
-            className="group relative flex-1 py-6 bg-accent text-white text-sm font-black uppercase tracking-[0.3em] rounded-3xl shadow-neon-purple hover:scale-[1.02] active:scale-95 transition-all overflow-hidden"
+            disabled={status !== 'idle'}
+            className={`flex-1 h-20 rounded-3xl text-[12px] font-black uppercase tracking-[0.3em] shadow-xl transition-all duration-500 hover:scale-[1.02] active:scale-95 ${
+                status === 'success' ? 'bg-green-600 hover:bg-green-600 shadow-green-900/20' : 'bg-primary shadow-primary/20'
+            }`}
           >
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-            <span className="relative flex items-center justify-center gap-3">
-               <Zap size={18} /> Confirm Registration
-            </span>
-          </button>
+             {status === 'saving' ? (
+               <span className="flex items-center gap-3">
+                 <Loader2 size={24} className="animate-spin" /> UPLINKING TO REGISTRY...
+               </span>
+             ) : status === 'success' ? (
+               <span className="flex items-center gap-3">
+                 <CheckCircle2 size={24} /> REGISTRATION COMPLETE
+               </span>
+             ) : (
+               <span className="flex items-center gap-3">
+                 <Zap size={20} /> COMMIT REGISTRATION
+               </span>
+             )}
+          </Button>
           
-          <button 
+          <Button 
             type="button" 
+            variant="outline"
             onClick={() => navigate('/dashboard/patients')}
-            className="px-16 py-6 border border-glass-border text-accent text-sm font-black uppercase tracking-[0.3em] rounded-3xl hover:bg-white/5 active:scale-95 transition-all"
+            className="px-16 h-20 border-2 border-border font-black text-[12px] uppercase tracking-[0.3em] rounded-3xl hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 active:scale-95 transition-all"
           >
-            Discard
-          </button>
-        </div>
-
-        {/* Decorative Grid Icons */}
-        <div className="absolute -bottom-10 -right-10 text-accent opacity-5 rotate-12 pointer-events-none">
-          <Database size={240} />
+            Discard Entry
+          </Button>
         </div>
       </form>
     </div>
