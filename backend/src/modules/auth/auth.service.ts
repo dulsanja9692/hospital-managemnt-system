@@ -1,8 +1,5 @@
 // ──────────────────────────────────────────────────────────────────────────────
-// Auth Service — business logic for authentication.
-//
-// Handles login, token refresh, logout, and current-user retrieval.
-// No HTTP concerns here — that's the controller's job.
+// Auth Service — Updated for Dynamic Role Resolution
 // ──────────────────────────────────────────────────────────────────────────────
 
 import { AppError } from '../../utils/apiError';
@@ -19,7 +16,7 @@ interface LoginResult {
     user_id: string;
     name: string;
     email: string;
-    role: string;
+    role: string; // We ensure this is the string 'Super Admin', not an object
     hospital_id: string;
   };
 }
@@ -31,55 +28,38 @@ interface RefreshResult {
 
 // ── Service Functions ────────────────────────────────────────────────────────
 
-/**
- * Authenticate a user with email and password.
- *
- * Business rules:
- * - User must exist (generic 401 if not)
- * - User must have 'ACTIVE' status (403 if inactive)
- * - Password must match the stored hash (generic 401 if not)
- * - On success: issue access + refresh tokens, log to audit
- *
- * @param email - The user's email address.
- * @param password - The plaintext password to verify.
- * @returns Access token, refresh token, and user info.
- */
 export async function login(email: string, password: string): Promise<LoginResult> {
-  // 1) Find user by email
   const user = await authRepo.findUserByEmail(email);
   if (!user) {
     throw new AppError('Invalid email or password.', 401);
   }
 
-  // 2) Check if user is active
   if (user.status !== 'ACTIVE') {
-    throw new AppError('Your account has been deactivated. Please contact the administrator.', 403);
+    throw new AppError('Your account has been deactivated.', 403);
   }
 
-  // 3) Verify password
   const isPasswordValid = await comparePassword(password, user.password_hash);
   if (!isPasswordValid) {
     throw new AppError('Invalid email or password.', 401);
   }
 
-  // 4) Build token payload
+  // Ensure we grab the name from the role object
+  const roleName = user.role?.name || 'Receptionist';
+
   const tokenPayload = {
     userId: user.user_id,
     email: user.email,
-    role: user.role.name,
+    role: roleName,
     hospitalId: user.hospital_id,
   };
 
-  // 5) Sign tokens
   const accessToken = signAccessToken(tokenPayload);
   const refreshToken = signRefreshToken(tokenPayload);
 
-  // 6) Store hashed refresh token in DB
   const refreshTokenHash = await hashPassword(refreshToken);
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   await authRepo.createRefreshToken(user.user_id, refreshTokenHash, expiresAt);
 
-  // 7) Write audit log
   await authRepo.createAuditLog(user.user_id, 'LOGIN', 'USER', user.user_id);
 
   return {
@@ -89,26 +69,13 @@ export async function login(email: string, password: string): Promise<LoginResul
       user_id: user.user_id,
       name: user.name,
       email: user.email,
-      role: user.role.name,
+      role: roleName,
       hospital_id: user.hospital_id,
     },
   };
 }
 
-/**
- * Refresh the access token using a valid refresh token.
- *
- * Business rules:
- * - Verify the refresh token JWT signature
- * - Find a matching hashed token in the DB
- * - Check the token hasn't expired
- * - Rotate: delete old token, issue new pair
- *
- * @param oldRefreshToken - The refresh token from the httpOnly cookie.
- * @returns New access token and new refresh token.
- */
 export async function refreshToken(oldRefreshToken: string): Promise<RefreshResult> {
-  // 1) Verify the JWT signature
   let decoded;
   try {
     decoded = verifyRefreshToken(oldRefreshToken);
@@ -116,13 +83,11 @@ export async function refreshToken(oldRefreshToken: string): Promise<RefreshResu
     throw new AppError('Invalid or expired refresh token.', 401);
   }
 
-  // 2) Find all refresh tokens for this user and check for a match
   const storedTokens = await authRepo.findRefreshTokensByUserId(decoded.userId);
   if (storedTokens.length === 0) {
     throw new AppError('Invalid or expired refresh token.', 401);
   }
 
-  // 3) Find the matching token by comparing hashes
   let matchedToken = null;
   for (const stored of storedTokens) {
     const isMatch = await comparePassword(oldRefreshToken, stored.token_hash);
@@ -136,16 +101,13 @@ export async function refreshToken(oldRefreshToken: string): Promise<RefreshResu
     throw new AppError('Invalid or expired refresh token.', 401);
   }
 
-  // 4) Check if the stored token has expired
   if (new Date() > matchedToken.expires_at) {
     await authRepo.deleteRefreshToken(matchedToken.token_id);
-    throw new AppError('Refresh token has expired. Please login again.', 401);
+    throw new AppError('Refresh token has expired.', 401);
   }
 
-  // 5) Delete the old token (rotation)
   await authRepo.deleteRefreshToken(matchedToken.token_id);
 
-  // 6) Issue new token pair
   const tokenPayload = {
     userId: decoded.userId,
     email: decoded.email,
@@ -156,7 +118,6 @@ export async function refreshToken(oldRefreshToken: string): Promise<RefreshResu
   const newAccessToken = signAccessToken(tokenPayload);
   const newRefreshToken = signRefreshToken(tokenPayload);
 
-  // 7) Store new hashed refresh token
   const newTokenHash = await hashPassword(newRefreshToken);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   await authRepo.createRefreshToken(decoded.userId, newTokenHash, expiresAt);
@@ -167,14 +128,7 @@ export async function refreshToken(oldRefreshToken: string): Promise<RefreshResu
   };
 }
 
-/**
- * Logout a user by invalidating their refresh token.
- *
- * @param oldRefreshToken - The refresh token from the httpOnly cookie.
- * @param userId - The authenticated user's ID (from JWT).
- */
 export async function logout(oldRefreshToken: string, userId: string): Promise<void> {
-  // Find and delete the matching refresh token
   const storedTokens = await authRepo.findRefreshTokensByUserId(userId);
 
   for (const stored of storedTokens) {
@@ -184,21 +138,25 @@ export async function logout(oldRefreshToken: string, userId: string): Promise<v
       break;
     }
   }
-
-  // Write audit log
   await authRepo.createAuditLog(userId, 'LOGOUT', 'USER', userId);
 }
 
 /**
- * Get the current authenticated user's details.
- *
- * @param userId - The authenticated user's ID (from JWT).
- * @returns User details (excluding password hash).
+ * UPDATED: getMe now extracts the role name string correctly
  */
 export async function getMe(userId: string) {
   const user = await authRepo.findUserById(userId);
   if (!user) {
     throw new AppError('User not found.', 404);
   }
-  return user;
+
+  // We flatten the role object so the frontend gets a simple string
+  return {
+    user_id: user.user_id,
+    name: user.name,
+    email: user.email,
+    hospital_id: user.hospital_id,
+    status: user.status,
+    role: user.role?.name || 'Receptionist', // 👈 This maps Role Object -> String
+  };
 }

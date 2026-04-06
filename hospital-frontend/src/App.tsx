@@ -5,31 +5,25 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 // --- API Utility ---
 import api from './lib/api'; 
 
-// --- Pages (Route Entry Points) ---
+// --- Pages & Layouts ---
 import { LoginPage } from './pages/LoginPage';
 import { PublicDashboard } from './pages/PublicDashboard';
 import { DashboardOverview } from './pages/DashboardOverview';
+import { DashboardLayout } from './layouts/DashboardLayout';
 
-// --- Feature Components (Patient Management) ---
+// --- Feature Components ---
 import { PatientList } from './features/patients/PatientList'; 
 import { PatientRegistration } from './features/patients/PatientRegistration';
 import { PatientProfile } from './features/patients/PatientProfile';
 import { EditPatientProfile } from './features/patients/EditPatientProfile';
-
-// --- Feature Components (Doctor Management) ---
 import { DoctorList } from './features/doctors/DoctorList';
 import { DoctorRegistration } from './features/doctors/DoctorRegistration';
 import { DoctorSchedule } from './features/doctors/DoctorSchedule'; 
-
-// --- Feature Components (Appointment & Consultation) ---
 import { AppointmentList } from './features/appointments/AppointmentList';
-import { ConsultationSession } from './features/consultations/ConsultationSession'; // NEW IMPORT
+import { ConsultationSession } from './features/consultations/ConsultationSession'; 
 
-// --- Layouts ---
-import { DashboardLayout } from './layouts/DashboardLayout';
 import type { User } from './types'; 
 
-// Guard component to handle unauthorized access
 const ProtectedRoute = ({ isAllowed }: { isAllowed: boolean }) => {
   return isAllowed ? <Outlet /> : <Navigate to="/login" replace />; 
 };
@@ -40,28 +34,34 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Check Backend Connection
+    // 1. Health Check
     api.get('/health')
       .then(() => console.log("✅ Medical Data Uplink: Stable"))
-      .catch((err: any) => {
-        console.error("❌ Medical Data Uplink: Failed. Verify src/lib/api.ts config.", err);
-      });
+      .catch((err: any) => console.error("❌ Uplink Failed", err));
 
-    // 2. Check Auth Session
-    const checkSession = () => {
+    // 2. Dynamic Session Recovery
+    const checkSession = async () => {
       const token = localStorage.getItem('token');
+      
       if (token) {
-        setIsAuthenticated(true);
-        // Personnel ID: ITBIN-2211-0249
-        setUser({ 
-          id: 'ITBIN-2211-0249', 
-          name: 'Sanjana', 
-          role: 'Receptionist',
-          email: 'sanjana@hospital.lk' 
-        });
+        try {
+          const response = await api.get('/auth/me'); 
+          // We check for response.data.user OR response.data based on controller logic
+          const userData = response.data.user || response.data;
+          setUser(userData); 
+          setIsAuthenticated(true);
+        } catch (err) {
+          console.error("Session sync failed:", err);
+          localStorage.removeItem('token');
+          setIsAuthenticated(false);
+          setUser(null);
+        }
       }
+      
+      // Ensure loading turns off regardless of outcome
       setLoading(false);
     };
+
     checkSession();
   }, []); 
 
@@ -70,10 +70,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 1. PUBLIC LANDING PAGE */}
         <Route path="/" element={<PublicDashboard />} />
 
-        {/* 2. AUTHENTICATION */}
         <Route 
           path="/login" 
           element={
@@ -86,30 +84,19 @@ function App() {
           } 
         />
 
-        {/* 3. PROTECTED MEDICAL DASHBOARD */}
         <Route element={<ProtectedRoute isAllowed={isAuthenticated} />}> 
           <Route path="/dashboard" element={<DashboardLayout user={user} />}>
-            
-            {/* Index Route: Intelligence HUD */}
             <Route index element={<DashboardOverview />} />
-            
-            {/* Patient Registry Module */}
             <Route path="patients" element={<PatientList />} /> 
             <Route path="patients/register" element={<PatientRegistration />} />
             <Route path="patients/:id" element={<PatientProfile />} />
             <Route path="patients/edit/:id" element={<EditPatientProfile />} />
-
-            {/* Doctor & Schedule Module */}
             <Route path="doctors" element={<DoctorList />} />
             <Route path="doctors/add" element={<DoctorRegistration />} />
             <Route path="doctors/schedule" element={<DoctorSchedule />} />
-
-            {/* Appointment & Consultation Module */}
             <Route path="appointments" element={<AppointmentList />} /> 
-            {/* NEW ROUTE: This makes the consultation page appear */}
             <Route path="appointments/session/:id" element={<ConsultationSession />} /> 
 
-            {/* Billing Module Placeholder */}
             <Route path="billing" element={
               <div className="flex flex-col items-center justify-center py-20 opacity-20 italic">
                 <h1 className="text-4xl font-black uppercase tracking-[0.5em]">Financial Uplink Pending</h1>
@@ -119,7 +106,6 @@ function App() {
           </Route>
         </Route>
 
-        {/* 4. CATCH-ALL REDIRECT */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

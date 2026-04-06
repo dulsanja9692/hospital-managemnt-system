@@ -99,7 +99,7 @@ export const Header = ({ userName }: { userName: string }) => {
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border/40 mx-2" />
             <DropdownMenuItem className="rounded-xl py-2.5 text-red-500 focus:bg-red-500/10 focus:text-red-600 cursor-pointer transition-colors font-bold">
-              <LogOut className="mr-2 h-4 w-4" /> Terminate Session
+              <LogOut className="mr-2 h-4 w-4" /> Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

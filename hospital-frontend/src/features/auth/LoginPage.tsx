@@ -39,23 +39,31 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
     try {
       // 1. Determine Endpoint based on toggle
       const endpoint = isRegistering ? '/auth/register' : '/auth/login';
-      const payload = isRegistering ? { name, email, password, role: 'Hospital Admin' } : { email, password };
+      
+      // If registering, we default to 'Hospital Admin', but the backend will 
+      // return the actual role name string.
+      const payload = isRegistering 
+        ? { name, email, password, role: 'Hospital Admin' } 
+        : { email, password };
 
       // 2. Real Backend Request
       const response = await api.post(endpoint, payload);
       
-      // 3. Extract Token and User from Node.js Response
+      // 3. Extract data from the flattened Node.js response
+      // After our Backend fix, user.role is now a STRING ('Super Admin')
       const { token, user } = response.data;
 
       // 4. Secure Handshake - Store Token
       localStorage.setItem('token', token);
       
       // 5. Update Global App State
+      // This ensures the role is updated in AuthContext immediately
       onLoginSuccess(user);
+      
+      // 6. Navigation
       navigate('/dashboard');
       
     } catch (err: unknown) {
-      // Handle "Unauthorized" or "Server Down" errors
       let message = "Uplink Failed: Check Credentials";
 
       if (typeof err === "object" && err !== null && "response" in err) {
@@ -79,7 +87,7 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full pointer-events-none animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-400/10 blur-[120px] rounded-full pointer-events-none" />
 
-      <Card className="w-full max-w-md z-10 rounded-[3rem] border-white/20 bg-card/40 backdrop-blur-3xl shadow-2xl shadow-blue-900/10 overflow-hidden transition-all duration-500">
+      <Card className="w-full max-w-md z-10 rounded-[3rem] border-white/20 bg-card/40 backdrop-blur-3xl shadow-2xl shadow-blue-900/10 overflow-hidden transition-all duration-500 border">
         <CardHeader className="text-center pt-10 pb-6">
           <div className="flex justify-center mb-6">
             <div className="relative group">
@@ -98,7 +106,6 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
         </CardHeader>
 
         <CardContent className="px-10 pb-10">
-          {/* Error Alert Display */}
           {error && (
             <Alert variant="destructive" className="mb-6 rounded-2xl bg-red-500/10 border-red-500/20 text-red-500 animate-in fade-in zoom-in duration-300">
               <AlertCircle size={16} />
@@ -137,7 +144,7 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Access Key</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Password</Label>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors z-10" size={18} />
                 <Input 
@@ -157,7 +164,7 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
             >
               {isLoading ? (
                 <span className="flex items-center gap-3">
-                  <Loader2 className="animate-spin" size={20} /> Authorizing...
+                  <Loader2 className="animate-spin" size={20} /> Login...
                 </span>
               ) : (
                 <span className="flex items-center gap-3">
@@ -183,8 +190,9 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
         </CardContent>
       </Card>
 
+      {/* FOOTER IDENTIFIER */}
       <div className="absolute bottom-6 text-center opacity-20 italic">
-          <p className="text-[9px] font-black tracking-[0.4em] uppercase">MediFlow Intelligence • ITBIN-2211-0249</p>
+          <p className="text-[9px] font-black tracking-[0.4em] uppercase">MediFlow  • {((import.meta as ImportMeta & { env?: { VITE_STUDENT_ID?: string } }).env?.VITE_STUDENT_ID) || '111234'}</p>
       </div>
     </div>
   );

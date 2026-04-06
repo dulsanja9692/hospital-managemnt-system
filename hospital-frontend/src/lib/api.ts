@@ -1,24 +1,24 @@
 import axios from 'axios';
 
-// Define the interface for your environment variables
-interface ImportMetaEnv {
-  readonly VITE_API_URL?: string;
+// Define the interface for environment variables
+declare global {
+  interface ImportMetaEnv {
+    readonly VITE_API_URL?: string;
+  }
+
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }
 }
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
-
-// 1. Setup the Base Instance
 const api = axios.create({
-  // Now we access it safely without using 'any'
-  baseURL: (import.meta as unknown as ImportMeta).env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// 2. REQUEST INTERCEPTOR: Automatically attaches "Staff Token"
+// 1. REQUEST INTERCEPTOR: Attaches the Bearer Token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -27,19 +27,27 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// 3. RESPONSE INTERCEPTOR: Handles Session Expiry
+// 2. RESPONSE INTERCEPTOR: Smart Session Handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      console.error("🚨 SECURITY ALERT: Session Expired. Terminating Uplink.");
+    const isUnauthorized = error.response?.status === 401;
+    const isLoginPage = window.location.pathname.includes('/login');
+    const isDashboardPage = window.location.pathname.includes('/dashboard');
+
+    if (isUnauthorized && !isLoginPage) {
+      console.warn("🚨 Session invalid. Cleaning local trace.");
+      
+      // Clear token only if we are sure it's a security rejection
       localStorage.removeItem('token');
-      window.location.href = '/login'; 
+      
+      // Only force redirect if the user is actively trying to view the dashboard
+      if (isDashboardPage) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

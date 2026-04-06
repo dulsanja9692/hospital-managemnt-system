@@ -5,7 +5,6 @@
 //   1. Extract data from the request
 //   2. Call the service layer
 //   3. Send the response
-// No business logic lives here.
 // ──────────────────────────────────────────────────────────────────────────────
 
 import type { Request, Response } from 'express';
@@ -33,7 +32,7 @@ export const loginHandler = asyncHandler(async (req: Request, res: Response): Pr
 
   const result = await authService.login(email, password);
 
-  // Set refresh token as httpOnly cookie
+  // Set refresh token as httpOnly cookie for security
   res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
 
   sendSuccess({
@@ -79,11 +78,12 @@ export const refreshHandler = asyncHandler(async (req: Request, res: Response): 
 export const logoutHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const refreshToken = req.cookies?.refreshToken as string | undefined;
 
+  // We only attempt to call the service if we have a user from the 'protect' middleware
   if (refreshToken && req.user) {
     await authService.logout(refreshToken, req.user.userId);
   }
 
-  // Clear the cookie regardless
+  // Clear the cookie regardless of logout success
   res.clearCookie('refreshToken', {
     httpOnly: true,
     secure: config.isProd,
@@ -101,10 +101,13 @@ export const logoutHandler = asyncHandler(async (req: Request, res: Response): P
 /**
  * GET /api/v1/auth/me
  * Return the current authenticated user's details.
+ * * FIXED: 'data' now returns the user object directly so App.tsx 
+ * can set the user state immediately and stop the loading spinner.
  */
 export const getMeHandler = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  // Ensure the 'protect' middleware has populated req.user
   if (!req.user) {
-    throw new AppError('Authentication required.', 401);
+    throw new AppError('Authentication required. Please login.', 401);
   }
 
   const user = await authService.getMe(req.user.userId);
@@ -113,6 +116,7 @@ export const getMeHandler = asyncHandler(async (req: Request, res: Response): Pr
     res,
     statusCode: 200,
     message: 'User details retrieved successfully',
-    data: { user },
+    // We send 'user' directly so response.data in Frontend IS the user object
+    data: user, 
   });
 });

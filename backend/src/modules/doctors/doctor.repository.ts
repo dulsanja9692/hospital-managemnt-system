@@ -411,7 +411,7 @@ export async function countFutureAppointments(doctorId: string) {
   return prisma.appointment.count({
     where: {
       doctor_id: doctorId,
-      scheduled_at: { gt: new Date() },
+      created_at: { gt: new Date() },
       status: { in: ['SCHEDULED', 'Booked', 'Confirmed'] },
     },
   });
@@ -429,7 +429,7 @@ export async function countAppointmentsOnDate(doctorId: string, date: Date) {
   return prisma.appointment.count({
     where: {
       doctor_id: doctorId,
-      scheduled_at: { gte: startOfDay, lte: endOfDay },
+      created_at: { gte: startOfDay, lte: endOfDay },
       status: { in: ['SCHEDULED', 'Booked', 'Confirmed'] },
     },
   });

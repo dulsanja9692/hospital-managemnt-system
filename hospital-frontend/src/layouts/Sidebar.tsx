@@ -161,13 +161,13 @@ export const Sidebar = ({ role, collapsed = false }: SidebarProps) => {
         >
           <LogOut size={22} className="group-hover:-translate-x-1 transition-transform duration-300" />
           {!collapsed && (
-            <span className="text-[11px] font-black uppercase tracking-widest">Terminate Session</span>
+            <span className="text-[11px] font-black uppercase tracking-widest">Log out</span>
           )}
         </Button>
         
         {!collapsed && (
           <p className="mt-4 text-[8px] text-center font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">
-            Uplink: ITBIN-2211-0249
+            Uplink: 111234
           </p>
         )}
       </div>
