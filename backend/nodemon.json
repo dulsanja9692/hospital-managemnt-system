@@ -1,6 +1,6 @@
 {
-  "watch": ["backend/src"],
+  "watch": ["src"],
   "ext": "ts,json",
   "ignore": ["node_modules", "dist", "**/*.test.ts"],
-  "exec": "tsx backend/src/server.ts"
+  "exec": "tsx src/server.ts"
 }

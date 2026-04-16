@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +25,6 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Form States
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -37,44 +37,40 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
     setError(null);
 
     try {
-      // 1. Determine Endpoint based on toggle
       const endpoint = isRegistering ? '/auth/register' : '/auth/login';
       
-      // If registering, we default to 'Hospital Admin', but the backend will 
-      // return the actual role name string.
       const payload = isRegistering 
         ? { name, email, password, role: 'Hospital Admin' } 
         : { email, password };
 
-      // 2. Real Backend Request
       const response = await api.post(endpoint, payload);
       
-      // 3. Extract data from the flattened Node.js response
-      // After our Backend fix, user.role is now a STRING ('Super Admin')
-      const { token, user } = response.data;
+      // FIXED: Mapping specifically to your backend's response structure
+      // Your backend returns { data: { accessToken, user } }
+      const { accessToken, user } = response.data.data || response.data;
 
-      // 4. Secure Handshake - Store Token
-      localStorage.setItem('token', token);
-      
-      // 5. Update Global App State
-      // This ensures the role is updated in AuthContext immediately
-      onLoginSuccess(user);
-      
-      // 6. Navigation
-      navigate('/dashboard');
-      
-    } catch (err: unknown) {
-      let message = "Uplink Failed: Check Credentials";
-
-      if (typeof err === "object" && err !== null && "response" in err) {
-        const response = (err as { response?: { data?: { message?: string } } }).response;
-        if (typeof response?.data?.message === "string") {
-          message = response.data.message;
-        }
+      if (!accessToken) {
+        throw new Error("No access token received from uplink.");
       }
 
+      // Store Token
+      localStorage.setItem('token', accessToken);
+      
+      // Update Global State
+      onLoginSuccess(user);
+      
+      // Clear any previous error states before navigating
+      setError(null);
+      navigate('/dashboard');
+      
+    } catch (err: any) {
+      let message = "Uplink Failed: Check Credentials";
+      if (err.response?.data?.message) {
+        message = err.response.data.message;
+      } else if (err.message) {
+        message = err.message;
+      }
       setError(message);
-      console.error("❌ Auth Error:", message);
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +79,6 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6 relative overflow-hidden transition-colors duration-500 font-sans text-left">
       
-      {/* BACKGROUND GLOWS */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full pointer-events-none animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-400/10 blur-[120px] rounded-full pointer-events-none" />
 
@@ -97,7 +92,7 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
               </div>
             </div>
           </div>
-          <CardTitle className="text-4xl font-black text-foreground tracking-tighter uppercase leading-none italic">
+          <CardTitle className="text-3xl font-black text-foreground tracking-tighter uppercase leading-none">
             {isRegistering ? 'Admin Setup' : 'Staff Portal'}
           </CardTitle>
           <CardDescription className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground mt-4">
@@ -116,12 +111,15 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
           <form onSubmit={handleAuth} className="space-y-6">
             {isRegistering && (
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Admin Full Name</Label>
+                <Label htmlFor="admin-name" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Admin Full Name</Label>
                 <div className="relative group">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors z-10" size={18} />
                   <Input 
+                    id="admin-name"
+                    name="admin-name"
                     required 
                     placeholder="Full Name" 
+                    autoComplete="name"
                     onChange={(e) => setName(e.target.value)}
                     className="h-14 pl-12 rounded-2xl bg-white/50 dark:bg-slate-800/50 border-border/40 focus-visible:ring-primary/20"
                   />
@@ -130,13 +128,16 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
             )}
 
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address</Label>
+              <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address</Label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors z-10" size={18} />
                 <Input 
+                  id="email"
+                  name="email"
                   type="email" 
                   required 
                   placeholder="admin@hospital.lk" 
+                  autoComplete="email"
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-14 pl-12 rounded-2xl bg-white/50 dark:bg-slate-800/50 border-border/40 focus-visible:ring-primary/20"
                 />
@@ -144,13 +145,16 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Password</Label>
+              <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Password</Label>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors z-10" size={18} />
                 <Input 
+                  id="password"
+                  name="password"
                   type="password" 
                   required 
                   placeholder="••••••••" 
+                  autoComplete="current-password"
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-14 pl-12 rounded-2xl bg-white/50 dark:bg-slate-800/50 border-border/40 focus-visible:ring-primary/20"
                 />
@@ -164,7 +168,7 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
             >
               {isLoading ? (
                 <span className="flex items-center gap-3">
-                  <Loader2 className="animate-spin" size={20} /> Login...
+                  <Loader2 className="animate-spin" size={20} /> Authorizing...
                 </span>
               ) : (
                 <span className="flex items-center gap-3">
@@ -190,9 +194,8 @@ export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
         </CardContent>
       </Card>
 
-      {/* FOOTER IDENTIFIER */}
-      <div className="absolute bottom-6 text-center opacity-20 italic">
-          <p className="text-[9px] font-black tracking-[0.4em] uppercase">MediFlow  • {((import.meta as ImportMeta & { env?: { VITE_STUDENT_ID?: string } }).env?.VITE_STUDENT_ID) || '111234'}</p>
+      <div className="absolute bottom-6 text-center opacity-20">
+          <p className="text-[9px] font-black tracking-[0.4em] uppercase">MediFlow  • ITBIN-2211-0249</p>
       </div>
     </div>
   );

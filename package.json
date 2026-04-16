@@ -1,65 +1,15 @@
 {
-  "name": "hospital-management-system",
-  "version": "1.0.0",
-  "description": "Hospital Management System — Production-grade Node.js/Express/TypeScript backend",
-  "license": "ISC",
-  "author": "gayasri pethum",
-  "type": "module",
-  "main": "dist/server.js",
+  "name": "hospital-management-system-root",
+  "private": true,
+  "workspaces": [
+    "hospital-frontend",
+    "backend"
+  ],
   "scripts": {
-    "dev": "nodemon",
-    "build": "rimraf dist && tsc -p tsconfig.json",
-    "start": "node dist/server.js",
-    "lint": "eslint 'backend/src/**/*.ts'",
-    "lint:fix": "eslint 'backend/src/**/*.ts' --fix",
-    "format": "prettier --write 'backend/src/**/*.ts'",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
-  },
-  "dependencies": {
-    "@prisma/client": "^6.5.0",
-    "axios": "^1.14.0",
-    "bcryptjs": "^2.4.3",
-    "compression": "^1.8.0",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "envalid": "^8.0.0",
-    "express": "^5.1.0",
-    "express-rate-limit": "^7.5.0",
-    "helmet": "^8.1.0",
-    "http-status-codes": "^2.3.0",
-    "jsonwebtoken": "^9.0.2",
-    "winston": "^3.17.0",
-    "zod": "^3.24.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.22.0",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/compression": "^1.7.5",
-    "@types/cookie-parser": "^1.4.8",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.9",
-    "@types/node": "^22.13.0",
-    "@types/supertest": "^6.0.2",
-    "concurrently": "^9.2.1",
-    "eslint": "^9.22.0",
-    "eslint-config-prettier": "^10.1.1",
-    "nodemon": "^3.1.14",
-    "prettier": "^3.5.3",
-    "prisma": "^6.5.0",
-    "rimraf": "^6.0.1",
-    "supertest": "^7.1.0",
-    "tsx": "^4.19.0",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.27.0",
-    "vitest": "^3.1.0"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "install:all": "npm install",
+    "dev:frontend": "npm run dev --workspace=hospital-frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "build:frontend": "npm run build --workspace=hospital-frontend",
+    "build:backend": "npm run build --workspace=backend"
   }
 }

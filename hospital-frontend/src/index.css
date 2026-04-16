@@ -1,6 +1,14 @@
 @import "tailwindcss";
+/* 1. IMPORT GOOGLE FONTS */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;700;900&display=swap');
+@plugin "tailwindcss-animate";
 
 @theme {
+  /* 2. DEFINE FONT FAMILIES */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+
+  /* Colors */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-primary: hsl(var(--primary));
@@ -32,16 +40,23 @@
   }
 
   body {
-    @apply min-h-screen antialiased bg-background text-foreground transition-colors duration-300;
+    /* Set Inter as the default global font */
+    @apply min-h-screen antialiased bg-background text-foreground font-sans transition-colors duration-300;
   }
 
-  /* FIXED: Direct CSS for high-contrast inputs (No more !important error) */
+  /* Apply Poppins to all Headings by default */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-poppins tracking-tight;
+  }
+
   input, textarea, select {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-weight: 700;
     border-width: 2px;
     border-color: hsl(var(--border));
+    /* Use Inter for inputs for better data readability */
+    @apply font-sans;
   }
 
   input:focus, textarea:focus, select:focus {

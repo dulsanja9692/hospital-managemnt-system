@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { Plus, Search, Filter, CalendarCheck, Clock, User, Activity } from 'lucide-react';
+import { Plus, CalendarCheck, Clock, User, Activity } from 'lucide-react';
 
 // Shadcn UI Imports
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { SearchBar } from '@/components/SearchBar';
 
 // Feature Components
 import { AddAppointmentModal } from './components/AddAppointmentModal';
@@ -62,7 +61,7 @@ export const AppointmentList = () => {
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase leading-none italic">
+            <h2 className="text-3xl font-black text-foreground tracking-tighter uppercase leading-none">
               Appointment <span className="text-primary">Registry</span>
             </h2>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mt-2">
@@ -80,24 +79,12 @@ export const AppointmentList = () => {
         </Button>
       </div>
 
-      {/* 2. SEARCH & FILTER TERMINAL */}
-      <Card className="p-1.5 bg-card/40 backdrop-blur-xl border-border/40 rounded-[2.5rem] shadow-2xl">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1 group">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-primary z-10" size={20} />
-            <Input 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="SEARCH BY PATIENT, DOCTOR, OR REF ID..." 
-              className="h-14 pl-16 pr-6 bg-transparent border-none focus-visible:ring-0 text-foreground font-bold placeholder:text-muted-foreground/30 tracking-widest text-[11px] uppercase"
-            />
-          </div>
-          <Separator orientation="vertical" className="h-8 opacity-20" />
-          <Button variant="ghost" size="icon" className="w-14 h-14 rounded-full text-muted-foreground hover:text-primary transition-colors">
-            <Filter size={20} />
-          </Button>
-        </div>
-      </Card>
+      {/* 2. SEARCH */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Search by patient, doctor, or ref ID..."
+      />
 
       {/* 3. QUEUE STREAM (Scrollable) */}
       <ScrollArea className="h-[calc(100vh-400px)] pr-4">

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Toaster } from 'sonner'; 
 
 // --- API Utility ---
 import api from './lib/api'; 
@@ -21,94 +22,117 @@ import { DoctorRegistration } from './features/doctors/DoctorRegistration';
 import { DoctorSchedule } from './features/doctors/DoctorSchedule'; 
 import { AppointmentList } from './features/appointments/AppointmentList';
 import { ConsultationSession } from './features/consultations/ConsultationSession'; 
+import { TaskOrchestrator } from './features/dashboard/TaskOrchestrator';
+import { PrescriptionTerminal } from './features/medical-records/PrescriptionTerminal';
+import { PaymentSystem } from './features/billing/PaymentSystem'; 
 
 import type { User } from './types'; 
 
-const ProtectedRoute = ({ isAllowed }: { isAllowed: boolean }) => {
-  return isAllowed ? <Outlet /> : <Navigate to="/login" replace />; 
+const ProtectedRoute = () => {
+  const token = localStorage.getItem('token');
+  return token ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Health Check
-    api.get('/health')
-      .then(() => console.log("✅ Medical Data Uplink: Stable"))
-      .catch((err: any) => console.error("❌ Uplink Failed", err));
-
-    // 2. Dynamic Session Recovery
-    const checkSession = async () => {
+    const initializeApp = async () => {
       const token = localStorage.getItem('token');
-      
-      if (token) {
-        try {
+      try {
+        if (token) {
           const response = await api.get('/auth/me'); 
-          // We check for response.data.user OR response.data based on controller logic
-          const userData = response.data.user || response.data;
-          setUser(userData); 
-          setIsAuthenticated(true);
-        } catch (err) {
-          console.error("Session sync failed:", err);
+          const userData = response.data?.user || 
+                           response.data?.data?.user || 
+                           response.data?.data || 
+                           response.data;
+          
+          if (userData && (userData.role || userData.role_name)) {
+            setUser(userData);
+          }
+        } else {
+          await api.get('/health');
+        }
+      } catch (err: any) {
+        if (err.response?.status === 401) {
           localStorage.removeItem('token');
-          setIsAuthenticated(false);
           setUser(null);
         }
+      } finally {
+        setLoading(false);
       }
-      
-      // Ensure loading turns off regardless of outcome
-      setLoading(false);
     };
-
-    checkSession();
+    initializeApp();
   }, []); 
 
   if (loading) return null;
 
+  // --- MOCK DATA FOR TERMINAL DEMO ---
+  const demoPatient = { id: 'P-1001', name: 'Saman Kumara' };
+  const demoItems = [
+    { name: 'General Consultation', price: 2500 },
+    { name: 'Amoxicillin 500mg (30 Tabs)', price: 1850 },
+    { name: 'Digital Record Maintenance', price: 500 }
+  ];
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<PublicDashboard />} />
+    <>
+      {/* 1. NEURAL ALERT LAYER (Sub Task 9) */}
+      <Toaster 
+        position="top-right" 
+        expand={false} 
+        richColors 
+        theme="light"
+        closeButton
+      />
 
-        <Route 
-          path="/login" 
-          element={
-            isAuthenticated ? 
-            <Navigate to="/dashboard" replace /> : 
-            <LoginPage onLoginSuccess={(u: User) => { 
-              setUser(u); 
-              setIsAuthenticated(true); 
-            }} />
-          } 
-        />
+      <BrowserRouter>
+        <Routes>
+          {/* 2. PUBLIC LANDING */}
+          <Route path="/" element={<PublicDashboard />} />
 
-        <Route element={<ProtectedRoute isAllowed={isAuthenticated} />}> 
-          <Route path="/dashboard" element={<DashboardLayout user={user} />}>
-            <Route index element={<DashboardOverview />} />
-            <Route path="patients" element={<PatientList />} /> 
-            <Route path="patients/register" element={<PatientRegistration />} />
-            <Route path="patients/:id" element={<PatientProfile />} />
-            <Route path="patients/edit/:id" element={<EditPatientProfile />} />
-            <Route path="doctors" element={<DoctorList />} />
-            <Route path="doctors/add" element={<DoctorRegistration />} />
-            <Route path="doctors/schedule" element={<DoctorSchedule />} />
-            <Route path="appointments" element={<AppointmentList />} /> 
-            <Route path="appointments/session/:id" element={<ConsultationSession />} /> 
+          {/* 3. AUTHENTICATION GATES */}
+          <Route 
+            path="/login" 
+            element={user ? <Navigate to="/dashboard" replace /> : <LoginPage onLoginSuccess={(u: User) => setUser(u)} />} 
+          />
 
-            <Route path="billing" element={
-              <div className="flex flex-col items-center justify-center py-20 opacity-20 italic">
-                <h1 className="text-4xl font-black uppercase tracking-[0.5em]">Financial Uplink Pending</h1>
-                <p className="text-xs font-bold uppercase tracking-widest mt-4">ITBIN-2211-0249 • Module Locked</p>
-              </div>
-            } />
+          {/* 4. PROTECTED TERMINAL INTERFACE */}
+          <Route element={<ProtectedRoute />}> 
+            <Route path="/dashboard" element={<DashboardLayout user={user} />}>
+              <Route index element={<DashboardOverview />} />
+              
+              {/* Patient Care Registry */}
+              <Route path="patients" element={<PatientList />} /> 
+              <Route path="patients/register" element={<PatientRegistration />} />
+              <Route path="patients/:id" element={<PatientProfile />} />
+              <Route path="patients/edit/:id" element={<EditPatientProfile />} />
+
+              {/* Specialist Management & Scheduling (Sub Task 11) */}
+              <Route path="doctors" element={<DoctorList />} />
+              <Route path="doctors/add" element={<DoctorRegistration />} />
+              <Route path="doctors/schedule" element={<DoctorSchedule />} />
+
+              {/* Logistics & Medical Operations */}
+              <Route path="appointments" element={<AppointmentList />} /> 
+              <Route path="appointments/session/:id" element={<ConsultationSession />} /> 
+              <Route path="prescriptions" element={<PrescriptionTerminal />} />
+              <Route path="workflows" element={<TaskOrchestrator />} />
+
+              {/* Financial Gateway (Sub Task 8) */}
+              <Route path="billing" element={
+                <div className="p-4 md:p-8 animate-in fade-in zoom-in-95 duration-500">
+                  <PaymentSystem patient={demoPatient} billItems={demoItems} />
+                </div>
+              } />
+            </Route>
           </Route>
-        </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </>
   );
 }
 

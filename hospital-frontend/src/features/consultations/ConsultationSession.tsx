@@ -28,7 +28,7 @@ export const ConsultationSession = () => {
             <ClipboardList size={28} />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase leading-none italic">
+            <h2 className="text-3xl font-black text-foreground tracking-tighter uppercase leading-none">
               Clinical <span className="text-primary">Consultation</span>
             </h2>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.4em] mt-2">
@@ -87,7 +87,7 @@ export const ConsultationSession = () => {
                 <div className="space-y-4 opacity-40">
                   <div className="border-l-2 border-primary/20 pl-4">
                     <p className="text-[10px] font-black tracking-widest">MAR 12, 2026</p>
-                    <p className="text-[11px] font-bold italic">Routine Checkup - Normal</p>
+                    <p className="text-[11px] font-bold">Routine Checkup - Normal</p>
                   </div>
                 </div>
               </ScrollArea>
@@ -147,7 +147,7 @@ export const ConsultationSession = () => {
               {/* Final Submit Actions */}
               <div className="pt-8 border-t border-border/20 flex flex-col sm:flex-row gap-4">
                 <Button className="flex-1 h-16 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all gap-3 uppercase tracking-widest text-[11px]">
-                  <Save size={20} /> Commit Consultation to EHR
+                  <Save size={20} /> Updated
                 </Button>
                 <Button variant="outline" className="h-16 px-10 border-border/40 font-black rounded-2xl text-[11px] uppercase tracking-widest hover:bg-red-500/10 hover:text-red-500 transition-all">
                   Cancel Session
@@ -156,7 +156,7 @@ export const ConsultationSession = () => {
 
               <div className="flex justify-center items-center gap-2 opacity-20">
                 <Zap size={12} className="text-primary" />
-                <span className="text-[8px] font-black uppercase tracking-[0.4em]">ITBIN-2211-0249 • Biometric Encrypted Record</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.4em]">I029 • Biometric Encrypted Record</span>
               </div>
             </CardContent>
           </Card>

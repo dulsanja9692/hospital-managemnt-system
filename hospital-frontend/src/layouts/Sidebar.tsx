@@ -1,70 +1,72 @@
-import { 
-  Home, 
-  Users, 
-  Calendar, 
-  CreditCard, 
-  LogOut, 
-  Activity, 
-  Stethoscope, 
-  ClipboardList // Added for Consultations
+import {
+  LayoutDashboard, ScanFace, CalendarSearch,
+  LogOut, BrainCircuit, Stethoscope, Workflow,
+  Landmark
 } from 'lucide-react';
+import type { ElementType } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import type { UserRole } from '../types';
-
-// Shadcn UI Imports
-import { Button } from "../components/ui/button";
-import { Separator } from "../components/ui/separator";
-import { cn } from "../lib/utils";
+import type { User, UserRole } from '../types';
+import { cn } from '../lib/utils';
+import { ScrollArea } from '../components/ui/scroll-area';
 
 interface SidebarProps {
   role: UserRole;
+  user?: User | null;
   collapsed?: boolean;
 }
 
-export const Sidebar = ({ role, collapsed = false }: SidebarProps) => {
+interface MenuItem {
+  icon: ElementType;
+  label: string;
+  path: string;
+  roles: string[];
+}
+
+const menuItems: MenuItem[] = [
+  { icon: LayoutDashboard, label: 'Dashboard',    path: '/dashboard',                          roles: ['Super Admin', 'Hospital Admin', 'Receptionist', 'Doctor', 'Accountant'] },
+  { icon: ScanFace,        label: 'Patients',     path: '/dashboard/patients',                 roles: ['Super Admin', 'Hospital Admin', 'Receptionist'] },
+  { icon: CalendarSearch,  label: 'Appointments', path: '/dashboard/appointments',             roles: ['Super Admin', 'Hospital Admin', 'Receptionist', 'Doctor'] },
+  { icon: BrainCircuit,    label: 'Consultations',path: '/dashboard/appointments/session/active', roles: ['Super Admin', 'Hospital Admin', 'Doctor'] },
+  { icon: Workflow,        label: 'Workflows',    path: '/dashboard/workflows',                roles: ['Super Admin', 'Hospital Admin'] },
+  { icon: Stethoscope,     label: 'Doctors',      path: '/dashboard/doctors',                  roles: ['Super Admin', 'Hospital Admin', 'Receptionist'] },
+  { icon: Landmark,        label: 'Billing',      path: '/dashboard/billing',                  roles: ['Super Admin', 'Hospital Admin', 'Accountant'] },
+];
+
+// Role → badge colour
+const roleBadgeColor: Record<string, string> = {
+  'Super Admin':    'text-violet-600',
+  'Hospital Admin': 'text-blue-600',
+  'Doctor':         'text-emerald-600',
+  'Receptionist':   'text-amber-600',
+  'Accountant':     'text-sky-600',
+};
+
+// Role → avatar bg
+const roleAvatarBg: Record<string, string> = {
+  'Super Admin':    'bg-violet-600',
+  'Hospital Admin': 'bg-blue-600',
+  'Doctor':         'bg-emerald-600',
+  'Receptionist':   'bg-amber-500',
+  'Accountant':     'bg-sky-600',
+};
+
+const getInitials = (name: string) =>
+  name
+    .split(' ')
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
+export const Sidebar = ({ role, user, collapsed = false }: SidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Unified Menu Items based on Feature-Driven paths
-  const menuItems = [
-    { 
-      icon: Home, 
-      label: 'Dashboard', 
-      path: '/dashboard', 
-      roles: ['Super Admin', 'Hospital Admin', 'Receptionist', 'Doctor', 'Accountant'] 
-    },
-    { 
-      icon: Users, 
-      label: 'Patients', 
-      path: '/dashboard/patients', 
-      roles: ['Super Admin', 'Hospital Admin', 'Receptionist'] 
-    },
-    { 
-      icon: Calendar, 
-      label: 'Appointments', 
-      path: '/dashboard/appointments', 
-      roles: ['Super Admin', 'Hospital Admin', 'Receptionist', 'Doctor'] 
-    },
-    // NEW: Consultation Link (Visible to Admins and Doctors)
-    { 
-      icon: ClipboardList, 
-      label: 'Consultations', 
-      path: '/dashboard/appointments/session/active', 
-      roles: ['Super Admin', 'Hospital Admin', 'Doctor'] 
-    },
-    { 
-      icon: Stethoscope, 
-      label: 'Doctors', 
-      path: '/dashboard/doctors', 
-      roles: ['Super Admin', 'Hospital Admin', 'Receptionist'] 
-    },
-    { 
-      icon: CreditCard, 
-      label: 'Billing', 
-      path: '/dashboard/billing', 
-      roles: ['Super Admin', 'Hospital Admin', 'Accountant'] 
-    },
-  ];
+  const filteredMenu = menuItems.filter((item) =>
+    item.roles.some(
+      (r) => r.toLowerCase().trim() === role?.toString().toLowerCase().trim()
+    )
+  );
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -72,103 +74,112 @@ export const Sidebar = ({ role, collapsed = false }: SidebarProps) => {
     window.location.reload();
   };
 
-  const filteredMenu = menuItems.filter(item => item.roles.includes(role));
+  const initials  = getInitials(user?.name || role || 'U');
+  const avatarBg  = roleAvatarBg[role]   ?? 'bg-slate-700';
+  const roleColor = roleBadgeColor[role] ?? 'text-slate-500';
 
   return (
-    <div className="flex flex-col h-full py-6 transition-all duration-500 font-sans">
-      
-      {/* 1. BRAND TERMINAL */}
-      <div className={cn(
-        "mb-12 px-4 transition-all duration-500",
-        collapsed ? "items-center flex flex-col px-0" : "text-left"
-      )}>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 bg-primary rounded-2xl shadow-xl shadow-primary/30 shrink-0 group hover:rotate-12 transition-transform duration-300">
-            <Activity size={24} className="text-white" />
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 font-sans select-none">
+
+      {/* ── BRAND ── */}
+      <div className={cn('px-5 pt-6 pb-5 border-b border-slate-100 dark:border-slate-800', collapsed && 'px-3 items-center flex flex-col')}>
+        {collapsed ? (
+          <div className="w-8 h-8 bg-slate-900 dark:bg-white rounded-lg flex items-center justify-center">
+            <span className="text-white dark:text-slate-900 text-xs font-black">M</span>
           </div>
-          {!collapsed && (
-            <h2 className="text-2xl font-black text-foreground tracking-tighter uppercase leading-none italic animate-in fade-in slide-in-from-left-4">
-              MediFlow <span className="text-primary">+</span>
-            </h2>
-          )}
-        </div>
-        
-        {!collapsed && (
-          <div className="flex items-center gap-2 ml-1 animate-in fade-in duration-700">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span>
-            </span>
-            <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em]">
-              {role} TERMINAL
-            </span>
-          </div>
+        ) : (
+          <h1 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+            MediFlow <span className="text-blue-600">HMS</span>
+          </h1>
         )}
       </div>
-      
-      {/* 2. NAVIGATION STACK */}
-      <nav className="flex-1 space-y-2 px-2">
-        {filteredMenu.map((item) => {
-          const isActive = item.path === '/dashboard' 
-            ? location.pathname === '/dashboard' 
-            : location.pathname.startsWith(item.path);
 
-          return (
-            <Link key={item.label} to={item.path} className="block">
-              <Button
-                variant={isActive ? "default" : "ghost"}
-                className={cn(
-                  "w-full justify-start gap-4 h-14 rounded-2xl transition-all duration-300 group relative overflow-hidden border border-transparent",
-                  isActive 
-                    ? "bg-primary text-white shadow-xl shadow-primary/20 hover:bg-primary/90 translate-x-1 border-primary/20" 
-                    : "text-muted-foreground hover:bg-primary/5 hover:text-primary hover:border-primary/10",
-                  collapsed && "justify-center px-0 translate-x-0"
-                )}
-              >
-                <item.icon 
-                  size={22} 
+      {/* ── NAV ITEMS ── */}
+      <ScrollArea className="flex-1 py-3">
+        <nav className={cn('space-y-0.5', collapsed ? 'px-2' : 'px-3')}>
+          {filteredMenu.map((item) => {
+            const isActive =
+              item.path === '/dashboard'
+                ? location.pathname === '/dashboard'
+                : location.pathname.startsWith(item.path);
+
+            return (
+              <Link key={item.label} to={item.path} className="block">
+                <div
                   className={cn(
-                    "transition-transform duration-300 group-hover:scale-110 relative z-10",
-                    isActive ? "text-white" : "group-hover:text-primary"
-                  )} 
-                />
-                
-                {!collapsed && (
-                  <span className="text-[11px] font-black uppercase tracking-widest relative z-10 animate-in fade-in slide-in-from-left-2">
-                    {item.label}
-                  </span>
-                )}
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-pointer transition-colors duration-150',
+                    isActive
+                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white',
+                    collapsed && 'justify-center px-2'
+                  )}
+                >
+                  <item.icon
+                    size={18}
+                    className={cn(
+                      'shrink-0',
+                      isActive
+                        ? 'text-white dark:text-slate-900'
+                        : 'text-slate-500 dark:text-slate-400'
+                    )}
+                  />
+                  {!collapsed && (
+                    <span className="text-sm font-medium leading-none">
+                      {item.label}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+      </ScrollArea>
 
-                {isActive && (
-                  <div className="absolute inset-0 bg-linear-to-r from-white/10 to-transparent pointer-events-none" />
-                )}
-              </Button>
-            </Link>
-          );
-        })}
-      </nav>
+      {/* ── USER PROFILE ── */}
+      <div className={cn(
+        'border-t border-slate-100 dark:border-slate-800 px-3 py-4 flex items-center gap-3',
+        collapsed && 'justify-center px-2'
+      )}>
+        {/* Avatar */}
+        <div className={cn(
+          'shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold',
+          avatarBg
+        )}>
+          {initials}
+        </div>
 
-      {/* 3. SESSION TERMINATION */}
-      <div className="px-2 pt-6">
-        <Separator className="mb-6 opacity-20 bg-primary/20" />
-        <Button 
-          variant="ghost"
-          onClick={handleLogout}
-          className={cn(
-            "w-full justify-start gap-4 h-14 rounded-2xl text-red-500 hover:bg-red-500/10 hover:text-red-600 transition-all group",
-            collapsed && "justify-center px-0"
-          )}
-        >
-          <LogOut size={22} className="group-hover:-translate-x-1 transition-transform duration-300" />
-          {!collapsed && (
-            <span className="text-[11px] font-black uppercase tracking-widest">Log out</span>
-          )}
-        </Button>
-        
+        {/* Name + role */}
         {!collapsed && (
-          <p className="mt-4 text-[8px] text-center font-bold text-muted-foreground/30 uppercase tracking-[0.4em]">
-            Uplink: 111234
-          </p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate leading-tight">
+              {user?.name || 'User'}
+            </p>
+            <p className={cn('text-xs font-semibold uppercase tracking-wide truncate', roleColor)}>
+              {role}
+            </p>
+          </div>
+        )}
+
+        {/* Logout */}
+        {!collapsed && (
+          <button
+            onClick={handleLogout}
+            title="Log out"
+            className="shrink-0 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <LogOut size={16} />
+          </button>
+        )}
+
+        {/* Logout when collapsed */}
+        {collapsed && (
+          <button
+            onClick={handleLogout}
+            title="Log out"
+            className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors"
+          >
+            <LogOut size={16} />
+          </button>
         )}
       </div>
     </div>

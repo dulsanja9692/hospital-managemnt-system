@@ -57,7 +57,7 @@ export const EditPatientProfile = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-2 space-y-10 text-left transition-all duration-500 pb-20 font-sans">
+    <div className="max-w-7xl mx-auto p-2 space-y-10 text-left transition-all duration-500 pb-20 font-sans antialiased">
       
       {/* 1. HEADER SECTION */}
       <div className="flex items-center justify-between">
@@ -69,11 +69,11 @@ export const EditPatientProfile = () => {
             </div>
           </div>
           <div>
-            <h2 className="text-4xl font-black text-foreground tracking-tighter uppercase leading-none">
-              Clinical <span className="text-primary">Modification</span>
+            <h2 className="text-3xl font-poppins font-black text-foreground tracking-tighter uppercase leading-none">
+              Clinical <span className="text-primary">Update</span>
             </h2>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.4em] mt-2">
-              Secure Record Vault: {id}
+            <p className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-[0.4em] mt-2">
+              Authorized Patient Record • ID: {id}
             </p>
           </div>
         </div>
@@ -86,24 +86,24 @@ export const EditPatientProfile = () => {
           
           {/* Identity Card */}
           <Card className="rounded-[2.5rem] border-white/20 bg-card/40 backdrop-blur-3xl shadow-2xl overflow-hidden">
-            <CardHeader className="pb-4">
+            <CardHeader className="p-8 pb-4">
               <div className="flex items-center gap-3 text-primary">
                 <ShieldCheck size={20} />
-                <CardTitle className="font-black text-[11px] uppercase tracking-[0.3em]">Identity Management</CardTitle>
+                <CardTitle className="font-poppins font-black text-[11px] uppercase tracking-[0.3em]">Identity Verification</CardTitle>
               </div>
-              <Separator className="bg-primary/10 mt-2" />
+              <Separator className="bg-primary/10 mt-4" />
             </CardHeader>
-            <CardContent className="space-y-6 pt-0">
+            <CardContent className="px-8 space-y-6 pt-0">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</Label>
+                <Label className="text-[10px] font-poppins font-black uppercase tracking-widest text-muted-foreground ml-1">Legal Full Name</Label>
                 <Input 
                   value={formData.name} 
                   onChange={(e) => setFormData({...formData, name: e.target.value})} 
-                  className="h-14 rounded-2xl bg-white/50 dark:bg-slate-800/50 border-border/40 focus-visible:ring-primary/20 font-bold"
+                  className="h-14 rounded-2xl bg-white/50 dark:bg-slate-800/50 border-border/40 font-sans font-bold"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">NIC Number (ReadOnly)</Label>
+                <Label className="text-[10px] font-poppins font-black uppercase tracking-widest text-muted-foreground ml-1">Identity Reference (NIC) — Locked</Label>
                 <Input 
                   value={formData.nic} 
                   readOnly 
@@ -115,26 +115,26 @@ export const EditPatientProfile = () => {
 
           {/* Medical Vitals Card */}
           <Card className="rounded-[2.5rem] border-white/20 bg-card/40 backdrop-blur-3xl shadow-2xl overflow-hidden">
-            <CardHeader className="pb-4">
+            <CardHeader className="p-8 pb-4">
               <div className="flex items-center gap-3 text-primary">
                 <Activity size={20} />
-                <CardTitle className="font-black text-[11px] uppercase tracking-[0.3em]">Medical Vitals</CardTitle>
+                <CardTitle className="font-poppins font-black text-[11px] uppercase tracking-[0.3em]">Current Vitals</CardTitle>
               </div>
-              <Separator className="bg-primary/10 mt-2" />
+              <Separator className="bg-primary/10 mt-4" />
             </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-6 pt-0">
+            <CardContent className="grid grid-cols-2 gap-6 p-8 pt-0">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Blood Group</Label>
+                <Label className="text-[10px] font-poppins font-black uppercase tracking-widest text-muted-foreground ml-1">Blood Group</Label>
                 <div className="relative group">
                   <Droplets className="absolute left-4 top-1/2 -translate-y-1/2 text-red-500 z-10" size={16} />
                   <Select 
                     value={formData.bloodGroup} 
-                    onValueChange={(val) => setFormData({...formData, bloodGroup: val})}
+                    onValueChange={(val: string) => setFormData({...formData, bloodGroup: val})}
                   >
-                    <SelectTrigger className="h-14 pl-12 rounded-2xl bg-white/50 border-border/40 font-bold">
+                    <SelectTrigger className="h-14 pl-12 rounded-2xl bg-white/50 border-border/40 font-sans font-bold">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
-                    <SelectContent className="font-bold">
+                    <SelectContent className="font-sans font-bold">
                       {['A+', 'B+', 'O+', 'AB+', 'A-', 'B-', 'O-', 'AB-'].map(g => (
                         <SelectItem key={g} value={g}>{g}</SelectItem>
                       ))}
@@ -143,35 +143,35 @@ export const EditPatientProfile = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Body Mass (Weight)</Label>
+                <Label className="text-[10px] font-poppins font-black uppercase tracking-widest text-muted-foreground ml-1">Weight Index</Label>
                 <div className="relative">
                   <Scale className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 z-10" size={16} />
                   <Input 
                     value={formData.weight} 
                     onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                    className="h-14 pl-12 rounded-2xl bg-white/50 border-border/40 font-bold" 
+                    className="h-14 pl-12 rounded-2xl bg-white/50 border-border/40 font-sans font-bold" 
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Height Index</Label>
+                <Label className="text-[10px] font-poppins font-black uppercase tracking-widest text-muted-foreground ml-1">Height Index</Label>
                 <div className="relative">
                   <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 text-primary z-10" size={16} />
                   <Input 
                     value={formData.height} 
                     onChange={(e) => setFormData({...formData, height: e.target.value})}
-                    className="h-14 pl-12 rounded-2xl bg-white/50 border-border/40 font-bold" 
+                    className="h-14 pl-12 rounded-2xl bg-white/50 border-border/40 font-sans font-bold" 
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Core Temp</Label>
+                <Label className="text-[10px] font-poppins font-black uppercase tracking-widest text-muted-foreground ml-1">Body Temp</Label>
                 <div className="relative">
                   <Thermometer className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 z-10" size={16} />
                   <Input 
                     value={formData.temp} 
                     onChange={(e) => setFormData({...formData, temp: e.target.value})}
-                    className="h-14 pl-12 rounded-2xl bg-white/50 border-border/40 font-bold" 
+                    className="h-14 pl-12 rounded-2xl bg-white/50 border-border/40 font-sans font-bold" 
                   />
                 </div>
               </div>
@@ -184,33 +184,33 @@ export const EditPatientProfile = () => {
            <div className="p-8 space-y-6">
               <div className="flex items-center gap-3 text-primary">
                 <Phone size={20} />
-                <span className="font-black text-[11px] uppercase tracking-[0.3em]">Contact Protocol</span>
+                <span className="font-poppins font-black text-[11px] uppercase tracking-[0.3em]">Patient Reach</span>
               </div>
               <Input 
                 type="tel" 
                 value={formData.phone} 
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                className="h-14 rounded-2xl bg-white/50 border-border/40 font-bold" 
-                placeholder="PRIMARY MOBILE"
+                className="h-14 rounded-2xl bg-white/50 border-border/40 font-sans font-bold" 
+                placeholder="PRIMARY MOBILE NUMBER"
               />
               <Input 
                 value={formData.emergency} 
                 onChange={(e) => setFormData({...formData, emergency: e.target.value})}
-                className="h-14 rounded-2xl bg-white/50 border-border/40 font-bold" 
-                placeholder="EMERGENCY CONTACT RELATION"
+                className="h-14 rounded-2xl bg-white/50 border-border/40 font-sans font-bold" 
+                placeholder="EMERGENCY CONTACT & RELATION"
               />
            </div>
            <div className="p-8 space-y-6 bg-primary/2 border-l border-border/20">
               <div className="flex items-center gap-3 text-primary">
                 <MapPin size={20} />
-                <span className="font-black text-[11px] uppercase tracking-[0.3em]">Residential Address</span>
+                <span className="font-poppins font-black text-[11px] uppercase tracking-[0.3em]">Permanent Residence</span>
               </div>
               <Textarea 
                 rows={3} 
                 value={formData.address} 
                 onChange={(e) => setFormData({...formData, address: e.target.value})}
-                className="rounded-3xl bg-white/50 border-border/40 resize-none font-medium h-30 p-5" 
-                placeholder="FULL RESIDENCE ADDRESS"
+                className="rounded-3xl bg-white/50 border-border/40 resize-none font-sans font-medium h-30 p-5" 
+                placeholder="FULL RESIDENTIAL ADDRESS"
               />
            </div>
         </Card>
@@ -220,57 +220,57 @@ export const EditPatientProfile = () => {
           <CardHeader className="p-10 pb-6">
             <div className="flex items-center gap-3 text-primary">
               <ClipboardList size={22} />
-              <CardTitle className="font-black text-[11px] uppercase tracking-[0.3em]">Append Clinical History</CardTitle>
+              <CardTitle className="font-poppins font-black text-[11px] uppercase tracking-[0.3em]">New Clinical Observation</CardTitle>
             </div>
             <Separator className="bg-primary/10 mt-4" />
           </CardHeader>
           <CardContent className="p-10 pt-0 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="space-y-2">
-                <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Consultation Title</Label>
+                <Label className="text-[11px] font-poppins font-black uppercase tracking-widest text-muted-foreground ml-1">Visit Title</Label>
                 <Input 
-                  placeholder="e.g. Cardiological Screening" 
+                  placeholder="e.g. Wellness Screening" 
                   value={newLog.title} 
                   onChange={(e) => setNewLog({...newLog, title: e.target.value})} 
-                  className="h-14 rounded-2xl bg-white/50 border-border/40" 
+                  className="h-14 rounded-2xl bg-white/50 border-border/40 font-sans font-bold" 
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Attending Specialist</Label>
+                <Label className="text-[11px] font-poppins font-black uppercase tracking-widest text-muted-foreground ml-1">Specialist in Charge</Label>
                 <div className="relative group">
                   <Stethoscope size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary z-10" />
                   <Input 
-                    placeholder="Search Doctor..." 
+                    placeholder="Doctor's Name..." 
                     value={newLog.doctor} 
                     onChange={(e) => setNewLog({...newLog, doctor: e.target.value})} 
-                    className="h-14 pl-12 rounded-2xl bg-white/50 border-border/40" 
+                    className="h-14 pl-12 rounded-2xl bg-white/50 border-border/40 font-sans font-bold" 
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Department</Label>
-                <Select value={newLog.department} onValueChange={(val) => setNewLog({...newLog, department: val})}>
-                  <SelectTrigger className="h-14 rounded-2xl bg-white/50 border-border/40 font-bold">
+                <Label className="text-[11px] font-poppins font-black uppercase tracking-widest text-muted-foreground ml-1">Care Unit</Label>
+                <Select value={newLog.department} onValueChange={(val: string) => setNewLog({...newLog, department: val})}>
+                  <SelectTrigger className="h-14 rounded-2xl bg-white/50 border-border/40 font-sans font-bold">
                     <SelectValue placeholder="Select Dept" />
                   </SelectTrigger>
-                  <SelectContent className="font-bold">
-                    <SelectItem value="OPD">Outpatient (OPD)</SelectItem>
-                    <SelectItem value="Cardiology">Cardiology</SelectItem>
-                    <SelectItem value="Laboratory">Laboratory Unit</SelectItem>
-                    <SelectItem value="Emergency">Emergency Response</SelectItem>
+                  <SelectContent className="font-sans font-bold">
+                    <SelectItem value="OPD">Outpatient Care (OPD)</SelectItem>
+                    <SelectItem value="Cardiology">Heart & Vascular</SelectItem>
+                    <SelectItem value="Laboratory">Diagnostic Unit</SelectItem>
+                    <SelectItem value="Emergency">Urgent Care</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Clinical Observations & Prescription</Label>
+              <Label className="text-[11px] font-poppins font-black uppercase tracking-widest text-muted-foreground ml-1">Physician's Notes & Findings</Label>
               <Textarea 
                 rows={3} 
-                placeholder="Initialize diagnosis details..." 
+                placeholder="Document patient progress and treatment plan..." 
                 value={newLog.notes} 
                 onChange={(e) => setNewLog({...newLog, notes: e.target.value})} 
-                className="rounded-3xl bg-white/50 border-border/40 resize-none font-medium p-5"
+                className="rounded-3xl bg-white/50 border-border/40 resize-none font-sans font-medium p-5"
               />
             </div>
           </CardContent>
@@ -281,12 +281,12 @@ export const EditPatientProfile = () => {
           <Button 
             type="submit" 
             disabled={isSaving}
-            className="flex-1 h-16 bg-primary text-white font-black uppercase tracking-[0.3em] rounded-3xl shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all gap-3"
+            className="flex-1 h-16 bg-primary text-white font-poppins font-black uppercase tracking-[0.3em] rounded-3xl shadow-xl shadow-primary/40 hover:scale-[1.02] active:scale-95 transition-all gap-3"
           >
             {isSaving ? (
-              <><Loader2 size={24} className="animate-spin" /> Syncing Updates...</>
+              <><Loader2 size={24} className="animate-spin" /> Updating Record...</>
             ) : (
-              <><Zap size={20} /> Commit Updates</>
+              <><Zap size={20} /> Done </>
             )}
           </Button>
           
@@ -294,9 +294,9 @@ export const EditPatientProfile = () => {
             type="button" 
             variant="outline"
             onClick={() => navigate(`/dashboard/patients/${id}`)} 
-            className="px-16 h-16 border-2 border-border font-black uppercase tracking-[0.3em] rounded-3xl hover:bg-red-500/5 hover:text-red-500 hover:border-red-500/20 active:scale-95 transition-all gap-3"
+            className="px-16 h-16 border-2 border-border font-poppins font-black uppercase tracking-[0.3em] rounded-3xl hover:bg-red-500/5 hover:text-red-500 hover:border-red-500/20 active:scale-95 transition-all gap-3"
           >
-            <X size={20} /> Discard Changes
+            <X size={20} /> Discard
           </Button>
         </div>
       </form>

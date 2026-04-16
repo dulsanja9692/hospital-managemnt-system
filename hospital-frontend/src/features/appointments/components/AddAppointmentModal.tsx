@@ -51,7 +51,7 @@ export const AddAppointmentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
             <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
               <User size={14} className="text-primary" /> Select Patient
             </Label>
-            <Select onValueChange={(val) => setFormData({...formData, patientId: val})}>
+            <Select onValueChange={(val: string) => setFormData({...formData, patientId: val})}>
               <SelectTrigger className="h-14 rounded-2xl bg-white/5 border-border font-bold">
                 <SelectValue placeholder="Search Patient Database..." />
               </SelectTrigger>
@@ -67,7 +67,7 @@ export const AddAppointmentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
             <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
               <Stethoscope size={14} className="text-primary" /> Assign Specialist
             </Label>
-            <Select onValueChange={(val) => setFormData({...formData, doctorId: val})}>
+            <Select onValueChange={(val: string) => setFormData({...formData, doctorId: val})}>
               <SelectTrigger className="h-14 rounded-2xl bg-white/5 border-border font-bold">
                 <SelectValue placeholder="Select Doctor..." />
               </SelectTrigger>
@@ -83,7 +83,7 @@ export const AddAppointmentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
             <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2 ml-1">
               <Calendar size={14} className="text-primary" /> Available Session
             </Label>
-            <Select onValueChange={(val) => setFormData({...formData, sessionId: val})}>
+            <Select onValueChange={(val: string) => setFormData({...formData, sessionId: val})}>
               <SelectTrigger className="h-14 rounded-2xl bg-white/5 border-border font-bold">
                 <SelectValue placeholder="Choose Timeslot..." />
               </SelectTrigger>

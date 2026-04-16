@@ -20,7 +20,7 @@ export default tseslint.config(
 
   // ── Custom rules ───────────────────────────────────────────────────────────
   {
-    files: ['backend/src/**/*.ts'],
+    files: ['src/**/*.ts'],
     rules: {
       // Prevent unused variables (allow underscore-prefixed)
       '@typescript-eslint/no-unused-vars': [

@@ -7,11 +7,11 @@
     "lib": ["ES2022"],
 
     /* ── File Layout ── */
-    "rootDir": "./backend/src",
+    "rootDir": "./src",
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./backend/src/*"]
+      "@/*": ["./src/*"]
     },
 
     /* ── Strictness — all flags on for maximum safety ── */
@@ -38,6 +38,6 @@
     "resolveJsonModule": true,
     "skipLibCheck": true
   },
-  "include": ["backend/src/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

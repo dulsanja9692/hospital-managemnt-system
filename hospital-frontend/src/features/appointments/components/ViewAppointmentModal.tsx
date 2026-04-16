@@ -8,7 +8,7 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader, // Now being used!
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,6 @@ export const ViewAppointmentModal = ({ appointment, isOpen, onClose, onUpdate }:
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Appointment | null>(appointment);
 
-  // Sync internal state when appointment prop changes
   useEffect(() => {
     setFormData(appointment);
   }, [appointment]);
@@ -50,19 +49,22 @@ export const ViewAppointmentModal = ({ appointment, isOpen, onClose, onUpdate }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-xl rounded-[3rem] p-0 overflow-hidden border-border/40 bg-card/90 backdrop-blur-3xl shadow-2xl font-sans">
+      {/* CRITICAL FIX: [&>button]:hidden 
+          This removes the default Shadcn absolute-positioned close button 
+      */}
+      <DialogContent className="sm:max-w-xl rounded-[3rem] p-0 overflow-hidden border-border/40 bg-card/90 backdrop-blur-3xl shadow-2xl font-sans [&>button]:hidden">
         
-        {/* 1. FIXED HEADER: Wrapped in DialogHeader to fix the error */}
+        {/* 1. HEADER AREA */}
         <DialogHeader className="h-24 bg-linear-to-r from-primary/20 to-transparent flex flex-row items-center justify-between px-8 border-b border-border/20 space-y-0">
           <div className="flex items-center gap-4 text-left">
             <div className="p-3 bg-primary text-white rounded-2xl shadow-lg shrink-0">
               <Calendar size={20} />
             </div>
             <div>
-              <DialogTitle className="text-lg font-black uppercase tracking-tighter text-foreground">
+              <DialogTitle className="text-lg font-black uppercase tracking-tighter text-foreground leading-none">
                 {isEditing ? "Edit Engagement" : "Session Details"}
               </DialogTitle>
-              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em]">REF: {appointment.id}</p>
+              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em] mt-1">REF: {appointment.id}</p>
             </div>
           </div>
           
@@ -72,13 +74,19 @@ export const ViewAppointmentModal = ({ appointment, isOpen, onClose, onUpdate }:
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setIsEditing(true)}
-                className="rounded-xl hover:bg-primary/10 text-primary"
+                className="rounded-xl hover:bg-primary/10 text-primary transition-colors"
               >
                 <Edit2 size={18} />
               </Button>
             )}
-            <Button variant="ghost" size="icon" onClick={onClose} className="rounded-xl hover:bg-red-500/10 text-muted-foreground">
-              <X size={20} />
+            {/* Keeping only this custom close button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onClose} 
+              className="rounded-xl hover:bg-red-500/10 text-muted-foreground group transition-colors"
+            >
+              <X size={20} className="group-hover:rotate-90 transition-transform duration-300" />
             </Button>
           </div>
         </DialogHeader>
@@ -100,11 +108,11 @@ export const ViewAppointmentModal = ({ appointment, isOpen, onClose, onUpdate }:
                 <Stethoscope size={12} /> Assign Specialist
               </label>
               {isEditing ? (
-                <Select onValueChange={(val) => setFormData({...formData, doctor: val})} defaultValue={appointment.doctor}>
-                  <SelectTrigger className="h-12 rounded-2xl border-primary/20 font-bold">
+                <Select onValueChange={(val: string) => setFormData({...formData, doctor: val})} defaultValue={appointment.doctor}>
+                  <SelectTrigger className="h-12 rounded-2xl border-primary/20 font-bold focus:ring-primary/20">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent position="popper" className="z-100 font-bold">
+                  <SelectContent position="popper" className="z-100 font-bold rounded-xl">
                     <SelectItem value="Dr. Saman Perera">Dr. Saman Perera</SelectItem>
                     <SelectItem value="Dr. Anna Silva">Dr. Anna Silva</SelectItem>
                   </SelectContent>
@@ -127,7 +135,7 @@ export const ViewAppointmentModal = ({ appointment, isOpen, onClose, onUpdate }:
                   type="time" 
                   defaultValue={appointment.time} 
                   onChange={(e) => setFormData({...formData, time: e.target.value})}
-                  className="h-12 rounded-2xl border-primary/20 font-bold"
+                  className="h-12 rounded-2xl border-primary/20 font-bold focus:ring-primary/20"
                 />
               ) : (
                 <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl font-black text-primary flex items-center gap-2">
@@ -141,11 +149,11 @@ export const ViewAppointmentModal = ({ appointment, isOpen, onClose, onUpdate }:
                 <AlertCircle size={12} /> Current Status
               </label>
               {isEditing ? (
-                <Select onValueChange={(val) => setFormData({...formData, status: val})} defaultValue={appointment.status}>
-                  <SelectTrigger className="h-12 rounded-2xl border-primary/20 font-bold">
+                <Select onValueChange={(val: string) => setFormData({...formData, status: val})} defaultValue={appointment.status}>
+                  <SelectTrigger className="h-12 rounded-2xl border-primary/20 font-bold focus:ring-primary/20">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent position="popper" className="z-100 font-bold">
+                  <SelectContent position="popper" className="z-100 font-bold rounded-xl">
                     <SelectItem value="Scheduled">Scheduled</SelectItem>
                     <SelectItem value="In Progress">In Progress</SelectItem>
                     <SelectItem value="Completed">Completed</SelectItem>
@@ -166,12 +174,12 @@ export const ViewAppointmentModal = ({ appointment, isOpen, onClose, onUpdate }:
                 onClick={handleSave}
                 className="flex-1 h-14 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all gap-2 uppercase text-[10px] tracking-widest"
               >
-                <Save size={18} /> Sync Changes
+                <Save size={18} /> Updated
               </Button>
               <Button 
                 variant="ghost" 
                 onClick={() => setIsEditing(false)}
-                className="px-8 h-14 font-black rounded-2xl hover:bg-muted text-[10px] tracking-widest"
+                className="px-8 h-14 font-black rounded-2xl hover:bg-muted text-[10px] tracking-widest active:scale-95 transition-all"
               >
                 Discard
               </Button>
