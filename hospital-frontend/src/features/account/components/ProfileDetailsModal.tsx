@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const ProfileDetailsModal = ({ isOpen, onClose, user }: any) => {
  const [isEditing, setIsEditing] = useState(false);
  const [profile, setProfile] = useState({

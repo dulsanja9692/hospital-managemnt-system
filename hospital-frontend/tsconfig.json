@@ -18,7 +18,6 @@
     "jsx": "react-jsx",
 
     /* PATH ALIAS FIX START */
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },

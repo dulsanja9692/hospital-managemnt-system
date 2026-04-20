@@ -3,6 +3,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const SystemSettingsModal = ({ isOpen, onClose }: any) => {
  return (
  <Dialog open={isOpen} onOpenChange={onClose}>

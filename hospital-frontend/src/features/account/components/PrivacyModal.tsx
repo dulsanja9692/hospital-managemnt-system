@@ -2,7 +2,7 @@ import { ShieldCheck, Lock, Fingerprint, EyeOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-export const PrivacyModal = ({ isOpen, onClose }: any) => {
+export const PrivacyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
  return (
  <Dialog open={isOpen} onOpenChange={onClose}>
  <DialogContent className="sm:max-w-lg  p-10 bg-slate-950 text-white border-border font-sans [&>button]:hidden">
