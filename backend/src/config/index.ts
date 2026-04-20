@@ -27,7 +27,10 @@ const env = cleanEnv(process.env, {
   RATE_LIMIT_MAX: num({ default: 100, desc: 'Max requests per window' }),
 
   // ── CORS ──
-  CORS_ORIGIN: str({ default: 'http://localhost:3000', desc: 'Allowed CORS origin(s)' }),
+  CORS_ORIGIN: str({
+    default: 'http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:5175',
+    desc: 'Allowed CORS origin(s)',
+  }),
 });
 
 export const config = {

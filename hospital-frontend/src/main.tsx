@@ -4,7 +4,7 @@ import App from './App.tsx'
 import './index.css' // Global Tailwind & Variable setup
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+ <React.StrictMode>
+ <App />
+ </React.StrictMode>,
 )

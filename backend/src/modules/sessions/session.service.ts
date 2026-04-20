@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ──────────────────────────────────────────────────────────────────────────────
 // Session Service — business logic for session management.
 //

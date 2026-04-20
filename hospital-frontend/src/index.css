@@ -46,13 +46,12 @@
 
   /* Apply Poppins to all Headings by default */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-poppins tracking-tight;
+    @apply font-poppins;
   }
 
   input, textarea, select {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-weight: 700;
     border-width: 2px;
     border-color: hsl(var(--border));
     /* Use Inter for inputs for better data readability */
@@ -67,5 +66,25 @@
   ::placeholder {
     color: hsl(var(--foreground));
     opacity: 0.4;
+  }
+
+  /* Subtle rounded corners for main UI elements and page containers */
+  button, 
+  input, 
+  textarea, 
+  select,
+  [role="dialog"],
+  [role="menu"],
+  [role="tablist"],
+  .bg-card,
+  .bg-card\/40,
+  .bg-card\/60,
+  .bg-card\/80,
+  .bg-white,
+  .bg-slate-50,
+  .bg-slate-100,
+  .bg-slate-800,
+  .bg-slate-900 {
+    border-radius: 4px;
   }
 }

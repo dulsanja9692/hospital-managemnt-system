@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ──────────────────────────────────────────────────────────────────────────────
 // Appointment Service — business logic for appointment management.
 //

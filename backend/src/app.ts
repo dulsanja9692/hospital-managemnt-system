@@ -33,6 +33,11 @@ import { appointmentRouter } from './modules/appointments/appointment.routes';
 
 const app = express();
 
+const allowedOrigins = config.corsOrigin
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter((origin) => origin.length > 0);
+
 // ─────────────────────────── Security ────────────────────────────────────────
 // Helmet sets various HTTP headers (CSP, HSTS, X-Content-Type-Options, etc.)
 app.use(helmet());
@@ -40,10 +45,24 @@ app.use(helmet());
 // CORS — only allow requests from trusted origins
 app.use(
   cors({
-    origin: config.corsOrigin,
+    origin: (origin, callback) => {
+      // Allow same-origin tools and non-browser clients with no Origin header.
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 204,
   }),
 );
 

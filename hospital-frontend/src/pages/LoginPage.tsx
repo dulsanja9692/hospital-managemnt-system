@@ -2,7 +2,7 @@ import { LoginPageFeature } from '../features/auth/LoginPage'; // Ensure this ma
 import type { User } from '../types';
 
 interface LoginPageProps {
-  onLoginSuccess: (u: User) => void;
+ onLoginSuccess: (u: User) => void;
 }
 
 /**
@@ -10,9 +10,9 @@ interface LoginPageProps {
  * This component wraps the Feature logic to keep the 'pages' directory clean.
  */
 export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
-  return (
-    <div className="animate-in fade-in duration-1000">
-       <LoginPageFeature onLoginSuccess={onLoginSuccess} />
-    </div>
-  );
+ return (
+ <div className="animate-in fade-in duration-1000">
+ <LoginPageFeature onLoginSuccess={onLoginSuccess} />
+ </div>
+ );
 };

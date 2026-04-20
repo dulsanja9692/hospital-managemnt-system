@@ -3,5 +3,5 @@ import { twMerge } from "tailwind-merge"
 
 // This 'export' keyword is the most important part!
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+ return twMerge(clsx(inputs))
 }

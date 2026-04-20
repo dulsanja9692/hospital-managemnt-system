@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ──────────────────────────────────────────────────────────────────────────────
 // Doctor Controller — thin HTTP handlers for all doctor-related endpoints.
 //

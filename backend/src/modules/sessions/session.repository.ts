@@ -9,6 +9,7 @@
 
 import { prisma } from '../../config/database';
 import type { SlotData } from './slot.util';
+import type { Prisma } from '@prisma/client';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,7 +34,7 @@ export async function createSessionWithSlots(
   sessionData: CreateSessionData,
   slots: SlotData[],
 ) {
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const session = await tx.channelSession.create({
       data: {
         doctor_id: sessionData.doctor_id,
@@ -167,7 +168,7 @@ export async function updateSession(
  * Delete session + slots in a transaction.
  */
 export async function deleteSessionWithSlots(sessionId: string) {
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.sessionSlot.deleteMany({ where: { session_id: sessionId } });
     await tx.channelSession.delete({ where: { session_id: sessionId } });
   });
@@ -177,7 +178,7 @@ export async function deleteSessionWithSlots(sessionId: string) {
  * Delete existing slots and regenerate for a session.
  */
 export async function regenerateSlots(sessionId: string, slots: SlotData[]) {
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.sessionSlot.deleteMany({ where: { session_id: sessionId } });
 
     const created = await Promise.all(
@@ -398,17 +399,15 @@ export async function getSessionSlots(sessionId: string) {
  * Returns the booked slot's new count and whether the session became full.
  */
 export async function incrementBookedCount(sessionId: string) {
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     // SELECT FOR UPDATE — locks this row until transaction commits
-    const rows = await tx.$queryRawUnsafe<
-      Array<{ session_id: string; booked_count: number; max_patients: number; status: string }>
-    >(
+    const rows = (await tx.$queryRawUnsafe(
       `SELECT session_id, booked_count, max_patients, status
        FROM channel_sessions
        WHERE session_id = $1
        FOR UPDATE`,
       sessionId,
-    );
+    )) as unknown as Array<{ session_id: string; booked_count: number; max_patients: number; status: string }>;
 
     if (rows.length === 0) {
       throw new Error('SESSION_NOT_FOUND');
@@ -446,16 +445,14 @@ export async function incrementBookedCount(sessionId: string) {
  * If session was 'full', revert to 'open'.
  */
 export async function decrementBookedCount(sessionId: string) {
-  return prisma.$transaction(async (tx) => {
-    const rows = await tx.$queryRawUnsafe<
-      Array<{ session_id: string; booked_count: number; status: string }>
-    >(
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const rows = (await tx.$queryRawUnsafe(
       `SELECT session_id, booked_count, status
        FROM channel_sessions
        WHERE session_id = $1
        FOR UPDATE`,
       sessionId,
-    );
+    )) as unknown as Array<{ session_id: string; booked_count: number; status: string }>;
 
     if (rows.length === 0) return;
 

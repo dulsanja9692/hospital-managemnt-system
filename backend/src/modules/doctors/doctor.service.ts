@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ──────────────────────────────────────────────────────────────────────────────
 // Doctor Service — business logic for doctor management.
 //

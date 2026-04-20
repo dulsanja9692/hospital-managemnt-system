@@ -62,21 +62,19 @@ interface RescheduleData {
 export async function createAppointment(data: BookingData) {
   return prisma.$transaction(async (tx) => {
     // STEP 1 — Lock session row
-    const sessions = await tx.$queryRawUnsafe<
-      Array<{
-        session_id: string;
-        booked_count: number;
-        max_patients: number;
-        status: string;
-        doctor_id: string;
-      }>
-    >(
+    const sessions = (await tx.$queryRawUnsafe(
       `SELECT session_id, booked_count, max_patients, status, doctor_id
        FROM channel_sessions
        WHERE session_id = $1
        FOR UPDATE`,
       data.session_id,
-    );
+    )) as unknown as Array<{
+        session_id: string;
+        booked_count: number;
+        max_patients: number;
+        status: string;
+        doctor_id: string;
+      }>;
 
     if (sessions.length === 0) throw new Error('SESSION_NOT_FOUND');
     const session = sessions[0]!;
@@ -94,25 +92,21 @@ export async function createAppointment(data: BookingData) {
 
     if (data.slot_id) {
       // User requested a specific slot — lock it
-      const slots = await tx.$queryRawUnsafe<
-        Array<{ slot_id: string; slot_number: number; slot_time: string; is_booked: boolean }>
-      >(
+      const slots = (await tx.$queryRawUnsafe(
         `SELECT slot_id, slot_number, slot_time, is_booked
          FROM session_slots
          WHERE slot_id = $1 AND session_id = $2
          FOR UPDATE`,
         data.slot_id,
         data.session_id,
-      );
+      )) as unknown as Array<{ slot_id: string; slot_number: number; slot_time: string; is_booked: boolean }>;
 
       if (slots.length === 0) throw new Error('SLOT_NOT_IN_SESSION');
       if (slots[0]!.is_booked) throw new Error('SLOT_ALREADY_TAKEN');
       targetSlot = slots[0]!;
     } else {
       // System picks next available slot
-      const slots = await tx.$queryRawUnsafe<
-        Array<{ slot_id: string; slot_number: number; slot_time: string }>
-      >(
+      const slots = (await tx.$queryRawUnsafe(
         `SELECT slot_id, slot_number, slot_time
          FROM session_slots
          WHERE session_id = $1 AND is_booked = false
@@ -120,7 +114,7 @@ export async function createAppointment(data: BookingData) {
          LIMIT 1
          FOR UPDATE`,
         data.session_id,
-      );
+      )) as unknown as Array<{ slot_id: string; slot_number: number; slot_time: string }>;
 
       if (slots.length === 0) throw new Error('SESSION_FULL');
       targetSlot = slots[0]!;
@@ -274,15 +268,13 @@ export async function rescheduleAppointment(data: RescheduleData) {
     );
 
     // STEP 2 — Lock new session
-    const sessions = await tx.$queryRawUnsafe<
-      Array<{ session_id: string; booked_count: number; max_patients: number; status: string }>
-    >(
+    const sessions = (await tx.$queryRawUnsafe(
       `SELECT session_id, booked_count, max_patients, status
        FROM channel_sessions
        WHERE session_id = $1
        FOR UPDATE`,
       data.new_session_id,
-    );
+    )) as unknown as Array<{ session_id: string; booked_count: number; max_patients: number; status: string }>;
 
     if (sessions.length === 0) throw new Error('SESSION_NOT_FOUND');
     const newSession = sessions[0]!;
@@ -294,30 +286,26 @@ export async function rescheduleAppointment(data: RescheduleData) {
     let targetSlot: { slot_id: string; slot_number: number; slot_time: string };
 
     if (data.new_slot_id) {
-      const slots = await tx.$queryRawUnsafe<
-        Array<{ slot_id: string; slot_number: number; slot_time: string; is_booked: boolean }>
-      >(
+      const slots = (await tx.$queryRawUnsafe(
         `SELECT slot_id, slot_number, slot_time, is_booked
          FROM session_slots
          WHERE slot_id = $1 AND session_id = $2
          FOR UPDATE`,
         data.new_slot_id,
         data.new_session_id,
-      );
+      )) as unknown as Array<{ slot_id: string; slot_number: number; slot_time: string; is_booked: boolean }>;
       if (slots.length === 0) throw new Error('SLOT_NOT_IN_SESSION');
       if (slots[0]!.is_booked) throw new Error('SLOT_ALREADY_TAKEN');
       targetSlot = slots[0]!;
     } else {
-      const slots = await tx.$queryRawUnsafe<
-        Array<{ slot_id: string; slot_number: number; slot_time: string }>
-      >(
+      const slots = (await tx.$queryRawUnsafe(
         `SELECT slot_id, slot_number, slot_time
          FROM session_slots
          WHERE session_id = $1 AND is_booked = false
          ORDER BY slot_number ASC LIMIT 1
          FOR UPDATE`,
         data.new_session_id,
-      );
+      )) as unknown as Array<{ slot_id: string; slot_number: number; slot_time: string }>;
       if (slots.length === 0) throw new Error('SESSION_FULL');
       targetSlot = slots[0]!;
     }
