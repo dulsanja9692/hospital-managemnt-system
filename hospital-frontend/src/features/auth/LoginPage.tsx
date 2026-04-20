@@ -2,10 +2,10 @@
 import * as React from "react";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Lock, Mail, User, Loader2, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Activity, Lock, Mail, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
 
 // API Utility
-import api from '../../lib/api'; 
+import api from '../../lib/api';
 
 // UI Components
 import { Button } from "../../components/ui/button";
@@ -17,186 +17,151 @@ import { Alert, AlertDescription } from "../../components/ui/alert";
 import type { User as UserType } from '../../types';
 
 interface LoginPageProps {
- onLoginSuccess: (u: UserType) => void;
+  onLoginSuccess: (u: UserType) => void;
 }
 
 export const LoginPageFeature = ({ onLoginSuccess }: LoginPageProps) => {
- const [isRegistering, setIsRegistering] = useState(false);
- const [isLoading, setIsLoading] = useState(false);
- const [error, setError] = useState<string | null>(null);
- 
- const [email, setEmail] = useState('');
- const [password, setPassword] = useState('');
- const [name, setName] = useState('');
- 
- const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
- const handleAuth = async (e: React.FormEvent) => {
- e.preventDefault();
- setIsLoading(true);
- setError(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
- try {
- const endpoint = isRegistering ? '/auth/register' : '/auth/login';
- 
- const payload = isRegistering 
- ? { name, email, password, role: 'Hospital Admin' } 
- : { email, password };
+  const navigate = useNavigate();
 
- const response = await api.post(endpoint, payload);
- 
- // FIXED: Mapping specifically to your backend's response structure
- // Your backend returns { data: { accessToken, user } }
- const { accessToken, user } = response.data.data || response.data;
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
- if (!accessToken) {
- throw new Error("No access token received from uplink.");
- }
+    try {
+      // Always call the real backend — no mocks or fallbacks
+      const response = await api.post('/auth/login', { email, password });
 
- // Store Token
- localStorage.setItem('token', accessToken);
- 
- // Update Global State
- onLoginSuccess(user);
- 
- // Clear any previous error states before navigating
- setError(null);
- navigate('/dashboard');
- 
- } catch (err: any) {
- let message = "Uplink Failed: Check Credentials";
- if (err.response?.data?.message) {
- message = err.response.data.message;
- } else if (err.message) {
- message = err.message;
- }
- setError(message);
- } finally {
- setIsLoading(false);
- }
- };
+      // Backend returns: { data: { accessToken, user } }
+      const { accessToken, user } = response.data.data || response.data;
 
- return (
- <div className="min-h-screen flex items-center justify-center bg-background p-6 relative overflow-hidden transition-colors duration-500 font-sans text-left">
- 
- <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px]  pointer-events-none animate-pulse" />
- <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-400/10 blur-[120px]  pointer-events-none" />
+      if (!accessToken) {
+        throw new Error('No access token received from server.');
+      }
 
- <Card className="w-full max-w-md z-10  border-border bg-card   overflow-hidden transition-all duration-500 border">
- <CardHeader className="text-center pt-10 pb-6">
- <div className="flex justify-center mb-6">
- <div className="relative group">
- <div className="absolute inset-0 bg-primary/20 blur-2xl  group-hover:bg-primary/40 transition-all" />
- <div className="relative p-5 bg-primary   transition-transform group-hover:scale-105">
- {isRegistering ? <ShieldCheck size={36} className="text-white" /> : <Activity size={36} className="text-white" />}
- </div>
- </div>
- </div>
- <CardTitle className="text-2xl  text-foreground  uppercase leading-none">
- {isRegistering ? 'Admin Setup' : 'Staff Portal'}
- </CardTitle>
- <CardDescription className="text-[10px]  uppercase  text-muted-foreground mt-4">
- Authorized Personnel Only
- </CardDescription>
- </CardHeader>
+      // Persist token
+      localStorage.setItem('token', accessToken);
 
- <CardContent className="px-10 pb-10">
- {error && (
- <Alert variant="destructive" className="mb-6  bg-red-500/10 border-red-500/20 text-red-500 animate-in fade-in zoom-in duration-300">
- <AlertCircle size={16} />
- <AlertDescription className="text-[10px]  uppercase  ml-2">{error}</AlertDescription>
- </Alert>
- )}
+      // Update global auth state
+      onLoginSuccess(user);
 
- <form onSubmit={handleAuth} className="space-y-6">
- {isRegistering && (
- <div className="space-y-2">
- <Label htmlFor="admin-name" className="text-[10px]  uppercase  text-muted-foreground ml-1">Admin Full Name</Label>
- <div className="relative group">
- <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors z-10" size={18} />
- <Input 
- id="admin-name"
- name="admin-name"
- required 
- placeholder="Full Name" 
- autoComplete="name"
- onChange={(e) => setName(e.target.value)}
- className="h-14 pl-12  bg-card border-border focus-visible:ring-primary/20"
- />
- </div>
- </div>
- )}
+      setError(null);
+      navigate('/dashboard');
+    } catch (err: any) {
+      let message = 'Login failed. Please check your credentials.';
+      if (err.response?.data?.message) {
+        message = err.response.data.message;
+      } else if (err.message) {
+        message = err.message;
+      }
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
- <div className="space-y-2">
- <Label htmlFor="email" className="text-[10px]  uppercase  text-muted-foreground ml-1">Email Address</Label>
- <div className="relative group">
- <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors z-10" size={18} />
- <Input 
- id="email"
- name="email"
- type="email" 
- required 
- placeholder="admin@hospital.lk" 
- autoComplete="email"
- onChange={(e) => setEmail(e.target.value)}
- className="h-14 pl-12  bg-card border-border focus-visible:ring-primary/20"
- />
- </div>
- </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-6 relative overflow-hidden transition-colors duration-500 font-sans text-left">
 
- <div className="space-y-2">
- <Label htmlFor="password" className="text-[10px]  uppercase  text-muted-foreground ml-1">Password</Label>
- <div className="relative group">
- <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors z-10" size={18} />
- <Input 
- id="password"
- name="password"
- type="password" 
- required 
- placeholder="••••••••" 
- autoComplete="current-password"
- onChange={(e) => setPassword(e.target.value)}
- className="h-14 pl-12  bg-card border-border focus-visible:ring-primary/20"
- />
- </div>
- </div>
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-400/10 blur-[120px] pointer-events-none" />
 
- <Button 
- type="submit" 
- disabled={isLoading}
- className="w-full h-16  text-md  uppercase  transition-all group "
- >
- {isLoading ? (
- <span className="flex items-center gap-3">
- <Loader2 className="animate-spin" size={20} /> Authorizing...
- </span>
- ) : (
- <span className="flex items-center gap-3">
- {isRegistering ? 'Register Admin' : 'Authorize Login'}
- <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
- </span>
- )}
- </Button>
- </form>
+      <Card className="w-full max-w-md z-10 border-border bg-card overflow-hidden transition-all duration-500 border">
+        <CardHeader className="text-center pt-10 pb-6">
+          <div className="flex justify-center mb-6">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-primary/20 blur-2xl group-hover:bg-primary/40 transition-all" />
+              <div className="relative p-5 bg-primary transition-transform group-hover:scale-105">
+                <Activity size={36} className="text-white" />
+              </div>
+            </div>
+          </div>
+          <CardTitle className="text-2xl text-foreground uppercase leading-none">
+            Staff Portal
+          </CardTitle>
+          <CardDescription className="text-[10px] uppercase text-muted-foreground mt-4">
+            Authorized Personnel Only
+          </CardDescription>
+        </CardHeader>
 
- <div className="mt-10 pt-6 border-t border-border/30 text-center">
- <button 
- type="button"
- onClick={() => {
- setIsRegistering(!isRegistering);
- setError(null);
- }}
- className="text-primary/60 text-[10px]  uppercase  hover:text-primary transition-colors"
- >
- {isRegistering ? 'Back to Login' : 'System Setup? Request Access'}
- </button>
- </div>
- </CardContent>
- </Card>
+        <CardContent className="px-10 pb-10">
+          {error && (
+            <Alert variant="destructive" className="mb-6 bg-red-500/10 border-red-500/20 text-red-500 animate-in fade-in zoom-in duration-300">
+              <AlertCircle size={16} />
+              <AlertDescription className="text-[10px] uppercase ml-2">{error}</AlertDescription>
+            </Alert>
+          )}
 
- <div className="absolute bottom-6 text-center opacity-20">
- <p className="text-[9px]   uppercase">MediFlow • ITBIN-2211-0249</p>
- </div>
- </div>
- );
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-[10px] uppercase text-muted-foreground ml-1">
+                Email Address
+              </Label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors z-10" size={18} />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="admin@hospital.com"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-14 pl-12 bg-card border-border focus-visible:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-[10px] uppercase text-muted-foreground ml-1">
+                Password
+              </Label>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors z-10" size={18} />
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-14 pl-12 bg-card border-border focus-visible:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-16 text-md uppercase transition-all group"
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-3">
+                  <Loader2 className="animate-spin" size={20} /> Authorizing...
+                </span>
+              ) : (
+                <span className="flex items-center gap-3">
+                  Authorize Login
+                  <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+                </span>
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <div className="absolute bottom-6 text-center opacity-20">
+        <p className="text-[9px] uppercase">MediFlow • ITBIN-2211-0249</p>
+      </div>
+    </div>
+  );
 };
