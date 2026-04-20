@@ -154,7 +154,7 @@ export const Sidebar = ({ role, user, collapsed = false }: SidebarProps) => {
  <p className="text-[15px] text-slate-900 dark:text-white truncate leading-tight">
  {user?.name || 'User'}
  </p>
- <p className="text-[11px] uppercase truncate text-slate-500 mt-0.5">
+ <p className={cn("text-[11px] uppercase truncate mt-0.5", roleColor)}>
  {role}
  </p>
  </div>
